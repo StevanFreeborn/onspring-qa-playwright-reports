@@ -1,6 +1,6 @@
 import express from 'express';
 import passport from 'passport';
-import * as userService from '../services/user.js';
+import * as usersService from '../services/users.js';
 
 /**
  * @summary Gets the login view.
@@ -13,6 +13,7 @@ export function getLoginView(req, res) {
   const error = messages ? messages[0] : '';
   return res.render('pages/login', {
     title: 'Login',
+    csrfToken: req.csrfToken(),
     error: error,
   });
 }
@@ -72,7 +73,7 @@ export function getRegisterView(req, res) {
 export async function register(req, res) {
   const { email, password, verifyPassword } = req.body;
 
-  const result = await userService.registerUser(
+  const result = await usersService.registerUser(
     email,
     password,
     verifyPassword
@@ -93,7 +94,7 @@ export async function register(req, res) {
  * @param {express.NextFunction} next The next function
  * @returns {void}
  */
-export const ensureAuthenticated = (req, res, next) => {
+export function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   }
@@ -103,4 +104,19 @@ export const ensureAuthenticated = (req, res, next) => {
   }
 
   return res.redirect('/login');
-};
+}
+
+/**
+ * @summary Ensures that the user is authenticated.
+ * @param {express.Request} req The request object
+ * @param {express.Response} res The response object
+ * @param {express.NextFunction} next The next function
+ * @returns {void}
+ */
+export function ensureAnonymous(req, res, next) {
+  if (req.isAuthenticated() === false) {
+    return next();
+  }
+
+  return res.redirect('/');
+}

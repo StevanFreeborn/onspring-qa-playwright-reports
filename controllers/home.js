@@ -1,4 +1,5 @@
 import express from 'express';
+import * as reportsService from '../services/reports.js';
 
 /**
  * @summary Gets the index view.
@@ -7,7 +8,10 @@ import express from 'express';
  * @returns {void}
  */
 export function getIndexView(req, res) {
+  const reports = reportsService.getReportNames();
   res.render('pages/index', {
     title: 'QA Playwright Reports',
+    csrfToken: req.csrfToken(),
+    reports: reports,
   });
 }

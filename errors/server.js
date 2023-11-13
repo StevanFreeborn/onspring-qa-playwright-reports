@@ -13,5 +13,7 @@ export function errorHandler(error, req, res, next) {
     return next(error);
   }
 
-  return res.status(500).render('pages/error500', { title: 'Error' });
+  return res
+    .status(500)
+    .render('pages/error500', { title: 'Error', csrfToken: '' });
 }

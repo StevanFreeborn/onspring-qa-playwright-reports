@@ -12,7 +12,8 @@
     "link:fix": "eslint --fix .",
     "format:fix": "prettier --write .",
     "migrate": "prisma migrate dev",
-    "studio": "prisma studio"
+    "studio": "prisma studio",
+    "deploy": "prisma migrate deploy"
   },
   "author": {
     "name": "Stevan Freeborn",

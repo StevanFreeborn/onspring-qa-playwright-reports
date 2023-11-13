@@ -7,5 +7,7 @@ import express from 'express';
  * @returns {void}
  */
 export function getIndexView(req, res) {
-  res.render('pages/index', { title: 'Express' });
+  res.render('pages/index', {
+    title: 'QA Playwright Reports',
+  });
 }

@@ -12,7 +12,10 @@ import { prismaClient } from '../data/prisma.js';
 export function getLoginView(req, res) {
   const { messages } = req.session;
   const error = messages ? messages[0] : '';
-  return res.render('pages/login', { title: 'Login', error: error });
+  return res.render('pages/login', {
+    title: 'Login',
+    error: error,
+  });
 }
 
 /**
@@ -55,7 +58,10 @@ export const login = passport.authenticate('local', {
 export function getRegisterView(req, res) {
   const { messages } = req.session;
   const error = messages ? messages[0] : '';
-  return res.render('pages/register', { title: 'Register', error: error });
+  return res.render('pages/register', {
+    title: 'Register',
+    error: error,
+  });
 }
 
 /**

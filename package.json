@@ -1,5 +1,6 @@
 {
   "name": "onspring-qa-playwright-reports",
+  "private": true,
   "version": "1.0.0",
   "description": "This is an application designed to store and present playwright html reports generated from Onspring QA tests.",
   "main": "server.js",
@@ -11,11 +12,14 @@
     "link:fix": "eslint --fix .",
     "format:fix": "prettier --write ."
   },
-  "keywords": [],
   "author": {
     "name": "Stevan Freeborn",
     "email": "stevan.freeborn@gmail.com",
     "url": "https://stevanfreeborn.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/StevanFreeborn/onspring-qa-playwright-reports.git"
   },
   "license": "ISC",
   "devDependencies": {

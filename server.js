@@ -1,20 +1,20 @@
-import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 import cookieParser from 'cookie-parser';
 import 'dotenv/config';
 import express from 'express';
-import session from 'express-session';
 import passport from 'passport';
 import path from 'path';
-import csurf from 'tiny-csrf';
+import { csrf, generateCsrfToken } from './auth/csrf.js';
 import {
   deserializeUser,
   localStrategy,
   serializeUser,
 } from './auth/passport.js';
+import { session } from './auth/session.js';
 import * as authController from './controllers/auth.js';
 import * as homeController from './controllers/home.js';
-import { prismaClient } from './data/prisma.js';
-import { logger } from './logging/logger.js';
+import { clientErrorHandler } from './errors/client.js';
+import { errorHandler } from './errors/server.js';
+import { logErrors, logger } from './logging/logger.js';
 import { morgan } from './logging/morgan.js';
 
 const app = express();
@@ -23,35 +23,15 @@ app.use(morgan);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-      sameSite: 'strict',
-    },
-    store: new PrismaSessionStore(prismaClient, {
-      checkPeriod: 2 * 60 * 1000,
-      dbRecordIdIsSessionId: true,
-      dbRecordIdFunction: undefined,
-    }),
-  })
-);
 
-app.use(csurf(process.env.CSRF_SECRET, ['POST', 'PUT', 'PATCH', 'DELETE']));
-app.use((req, res, next) => {
-  if (req.method === 'GET') {
-    res.locals.csrfToken = req.csrfToken();
-  }
-  next();
-});
+app.use(session);
+
+app.use(csrf);
+app.use(generateCsrfToken);
 
 passport.use(localStrategy);
 passport.deserializeUser(deserializeUser);
 passport.serializeUser(serializeUser);
-
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -60,16 +40,43 @@ app.set('view engine', 'ejs', {
 });
 app.set('views', path.join(process.cwd(), 'views'));
 
+app.use(express.static(path.join(process.cwd(), 'public')));
+
 app.get('/login', authController.getLoginView);
 app.post('/login', authController.login);
 
-app.use(authController.redirectUnauthenticatedUser);
+app.get('/', authController.ensureAuthenticated, homeController.getIndexView);
+app.post('/logout', authController.ensureAuthenticated, authController.logout);
 
-app.get('/', homeController.getIndexView);
-app.post('/logout', authController.logout);
+app.get(
+  '/register',
+  authController.ensureAuthenticated,
+  authController.getRegisterView
+);
 
-app.get('/register', authController.getRegisterView);
-app.post('/register', authController.register);
+app.post(
+  '/register',
+  authController.ensureAuthenticated,
+  authController.register
+);
+
+app.use(
+  '/reports',
+  authController.ensureAuthenticated,
+  express.static(path.join(process.cwd(), 'reports'))
+);
+
+app.use(logErrors);
+app.use(clientErrorHandler);
+app.use(errorHandler);
+
+app.use(function (req, res) {
+  if (req.xhr) {
+    return res.status(404).send({ error: 'Not found' });
+  }
+
+  return res.status(404).render('pages/error404', { title: 'Not Found' });
+});
 
 const PORT = process.env.PORT || 3000;
 

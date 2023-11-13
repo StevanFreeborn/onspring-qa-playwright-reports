@@ -1,7 +1,6 @@
-import bcrypt from 'bcrypt';
 import express from 'express';
 import passport from 'passport';
-import { prismaClient } from '../data/prisma.js';
+import * as userService from '../services/user.js';
 
 /**
  * @summary Gets the login view.
@@ -73,44 +72,34 @@ export function getRegisterView(req, res) {
 export async function register(req, res) {
   const { email, password, verifyPassword } = req.body;
 
-  const existingUser = await prismaClient.user.findUnique({
-    where: {
-      email,
-    },
-  });
+  const result = await userService.registerUser(
+    email,
+    password,
+    verifyPassword
+  );
 
-  if (existingUser !== null) {
-    req.session.messages = ['User already exists'];
+  if (result.isFailed) {
+    req.session.messages = [result.error.message];
     return res.redirect('/register');
   }
-
-  if (password !== verifyPassword) {
-    req.session.messages = ['Passwords do not match'];
-    return res.redirect('/register');
-  }
-
-  const passwordHash = await bcrypt.hash(password, 10);
-
-  await prismaClient.user.create({
-    data: {
-      email,
-      passwordHash,
-    },
-  });
 
   return res.redirect('/');
 }
 
 /**
- * @summary Redirects the user to the login page if they are not authenticated.
+ * @summary Ensures that the user is authenticated.
  * @param {express.Request} req The request object
  * @param {express.Response} res The response object
  * @param {express.NextFunction} next The next function
  * @returns {void}
  */
-export const redirectUnauthenticatedUser = (req, res, next) => {
+export const ensureAuthenticated = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
+  }
+
+  if (req.xhr) {
+    return res.status(401).send({ error: 'Unauthorized' });
   }
 
   return res.redirect('/login');

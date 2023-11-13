@@ -10,7 +10,9 @@
     "dev": "nodemon -q server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "link:fix": "eslint --fix .",
-    "format:fix": "prettier --write ."
+    "format:fix": "prettier --write .",
+    "migrate": "prisma migrate dev",
+    "studio": "prisma studio"
   },
   "author": {
     "name": "Stevan Freeborn",

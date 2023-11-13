@@ -56,7 +56,8 @@ const consoleFormat = winston.format.combine(
   winston.format.printf(
     info => `${info.timestamp} ${info.level}: ${info.message}`
   ),
-  winston.format.align()
+  winston.format.align(),
+  winston.format.errors({ stack: true })
 );
 
 /**
@@ -108,6 +109,6 @@ export const logger = winston.createLogger({
  * @returns {void}
  */
 export function logErrors(error, req, res, next) {
-  logger.error(error);
+  logger.error('error', error);
   next(error);
 }

@@ -5,8 +5,19 @@
 
 <body>
   <main>
-    <h1>Hello World</h1>
+    <h1>Playwright Reports</h1>
     <button type="button" id="logout">Log out</button>
+    <% if (reports && reports.length) { %>
+    <ul>
+      <% reports.forEach(report => { %>
+      <li>
+        <a href="/reports/<%= report %>">
+          Playwright Report <%= report %>
+        </a>
+      </li>
+      <% }) %>
+    </ul>
+    <% } %>
   </main>
 </body>
 

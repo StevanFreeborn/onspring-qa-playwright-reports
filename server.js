@@ -3,7 +3,7 @@ import 'dotenv/config';
 import express from 'express';
 import passport from 'passport';
 import path from 'path';
-import { csrf, generateCsrfToken } from './auth/csrf.js';
+import { csrf } from './auth/csrf.js';
 import {
   deserializeUser,
   localStrategy,
@@ -27,7 +27,6 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 app.use(session);
 
 app.use(csrf);
-app.use(generateCsrfToken);
 
 passport.use(localStrategy);
 passport.deserializeUser(deserializeUser);
@@ -35,15 +34,13 @@ passport.serializeUser(serializeUser);
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.set('view engine', 'ejs', {
-  strict: false,
-});
+app.set('view engine', 'ejs');
 app.set('views', path.join(process.cwd(), 'views'));
 
 app.use(express.static(path.join(process.cwd(), 'public')));
 
-app.get('/login', authController.getLoginView);
-app.post('/login', authController.login);
+app.get('/login', authController.ensureAnonymous, authController.getLoginView);
+app.post('/login', authController.ensureAnonymous, authController.login);
 
 app.get('/', authController.ensureAuthenticated, homeController.getIndexView);
 app.post('/logout', authController.ensureAuthenticated, authController.logout);
@@ -60,11 +57,8 @@ app.post(
   authController.register
 );
 
-app.use(
-  '/reports',
-  authController.ensureAuthenticated,
-  express.static(path.join(process.cwd(), 'reports'))
-);
+app.use('/reports', authController.ensureAuthenticated);
+app.use('/reports', express.static(path.join(process.cwd(), 'reports')));
 
 app.use(logErrors);
 app.use(clientErrorHandler);
@@ -75,7 +69,9 @@ app.use(function (req, res) {
     return res.status(404).send({ error: 'Not found' });
   }
 
-  return res.status(404).render('pages/error404', { title: 'Not Found' });
+  return res
+    .status(404)
+    .render('pages/error404', { title: 'Not Found', csrfToken: '' });
 });
 
 const PORT = process.env.PORT || 3000;

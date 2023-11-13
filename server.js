@@ -12,9 +12,12 @@ import {
 import * as authController from './controllers/auth.js';
 import * as homeController from './controllers/home.js';
 import { prismaClient } from './data/prisma.js';
+import { logger } from './logging/logger.js';
+import { morgan } from './logging/morgan.js';
 
 const app = express();
 
+app.use(morgan);
 app.use(express.urlencoded({ extended: true }));
 app.use(
   session({
@@ -54,5 +57,5 @@ app.post('/logout', authController.logout);
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}`);
+  logger.info(`Listening on port ${PORT}`);
 });

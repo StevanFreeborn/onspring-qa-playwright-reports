@@ -4,41 +4,38 @@ import passport from 'passport';
 import { prismaClient } from '../data/prisma.js';
 
 /**
- * GET /
- * Home page.
- * @param req {express.Request}
- * @param res {express.Response}
- * @returns void
+ * @summary Gets the login view.
+ * @param {express.Request} req The request object
+ * @param {express.Response} res The response object
+ * @returns {void}
  */
 export function getLoginView(req, res) {
   const { messages } = req.session;
   const error = messages ? messages[0] : '';
-  res.render('pages/login', { title: 'Login', error: error });
+  return res.render('pages/login', { title: 'Login', error: error });
 }
 
 /**
- * POST /logout
- * Logs the user out.
- * @param req {express.Request}
- * @param res {express.Response}
- * @param next {express.NextFunction}
- * @returns void
+ * @summary Logs the user out.
+ * @param {express.Request} req The request object
+ * @param {express.Response} res The response object
+ * @param {express.NextFunction} next The next function
+ * @returns {void}
  */
 export function logout(req, res, next) {
-  req.logout(function (err) {
+  return req.logout(function (err) {
     if (err) {
       return next(err);
     }
 
-    res.redirect('/login');
+    return res.redirect('/login');
   });
 }
 
 /**
- * POST /login
- * Logs the user in.
- * @param req {express.Request}
- * @param res {express.Response}
+ * @summary Authenticates the user.
+ * @param {express.Request} req The request object
+ * @param {express.Response} res The response object
  * @returns void
  */
 export const login = passport.authenticate('local', {
@@ -51,22 +48,21 @@ export const login = passport.authenticate('local', {
 /**
  * GET /register
  * Gets the register view.
- * @param req {express.Request}
- * @param res {express.Response}
- * @returns void
+ * @param {express.Request} req The request object
+ * @param {express.Response} res The response object
+ * @returns {void}
  */
 export function getRegisterView(req, res) {
   const { messages } = req.session;
   const error = messages ? messages[0] : '';
-  res.render('pages/register', { title: 'Register', error: error });
+  return res.render('pages/register', { title: 'Register', error: error });
 }
 
 /**
- * POST /register
- * Registers a new user.
- * @param req {express.Request}
- * @param res {express.Response}
- * @returns void
+ * @summary Registers a new user.
+ * @param {express.Request} req The request object
+ * @param {express.Response} res The response object
+ * @returns {void}
  */
 export async function register(req, res) {
   const { email, password, verifyPassword } = req.body;
@@ -96,19 +92,20 @@ export async function register(req, res) {
     },
   });
 
-  res.redirect('/');
+  return res.redirect('/');
 }
 
 /**
- *
- * @param {express.Request} req
- * @param {express.Response} res
- * @param {express.NextFunction} next
- * @returns
+ * @summary Redirects the user to the login page if they are not authenticated.
+ * @param {express.Request} req The request object
+ * @param {express.Response} res The response object
+ * @param {express.NextFunction} next The next function
+ * @returns {void}
  */
 export const redirectUnauthenticatedUser = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
   }
-  res.redirect('/login');
+
+  return res.redirect('/login');
 };

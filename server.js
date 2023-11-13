@@ -46,13 +46,13 @@ app.set('views', path.join(process.cwd(), 'views'));
 app.get('/login', authController.getLoginView);
 app.post('/login', authController.login);
 
-app.get('/register', authController.getRegisterView);
-app.post('/register', authController.register);
-
 app.use(authController.redirectUnauthenticatedUser);
 
 app.get('/', homeController.getIndexView);
 app.post('/logout', authController.logout);
+
+app.get('/register', authController.getRegisterView);
+app.post('/register', authController.register);
 
 const PORT = process.env.PORT || 3000;
 

@@ -1,7 +1,6 @@
 import cookieParser from 'cookie-parser';
 import 'dotenv/config';
 import express from 'express';
-import 'newrelic';
 import passport from 'passport';
 import path from 'path';
 import { csrf } from './auth/csrf.js';

@@ -1,23 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<%- include('../partials/_head', { title: title, styles: [] }) %>
+<%- include('../partials/_head', { title: title, styles: styles ?? [] }) %>
 
 <body>
   <main>
-    <h1>Playwright Reports</h1>
-    <button type="button" id="logout">Log out</button>
-    <% if (reports && reports.length) { %>
-    <ul>
-      <% reports.forEach(report => { %>
-      <li>
-        <a href="/reports/<%= report %>">
-          Playwright Report <%= report %>
-        </a>
-      </li>
-      <% }) %>
-    </ul>
-    <% } %>
+    <div class="header-container">
+      <h1>Playwright Reports</h1>
+      <button class="logout-button" type="button" id="logout">Log out</button>
+    </div>
+    <div class="chip">
+      <div class="chip-header">
+        <h3>Reports</h3>
+      </div>
+      <div class="chip-body chip-body-no-insets">
+        <% if (reports && reports.length) { %>
+        <div class="test-wrapper">
+          <% reports.forEach(report => { %>
+          <div class="test-file-test">
+            <a href="/reports/<%= report %>">
+              Playwright Report <%= report %>
+            </a>
+          </div>
+          <% }) %>
+        </div>
+        <% } else { %>
+        <p>No reports found.</p>
+        <% } %>
+      </div>
+    </div>
   </main>
 </body>
 

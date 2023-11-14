@@ -59,6 +59,7 @@ export function getRegisterView(req, res) {
     title: 'Register',
     csrfToken: req.csrfToken(),
     error: error,
+    styles: ['register'],
   });
 }
 

@@ -1,6 +1,7 @@
 import cookieParser from 'cookie-parser';
 import 'dotenv/config';
 import express from 'express';
+import 'newrelic';
 import passport from 'passport';
 import path from 'path';
 import { csrf } from './auth/csrf.js';
@@ -38,6 +39,10 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(process.cwd(), 'views'));
 
 app.use(express.static(path.join(process.cwd(), 'public')));
+
+app.get('/api/ping', (req, res) => {
+  res.json({ message: 'pong' });
+});
 
 app.get('/login', authController.ensureAnonymous, authController.getLoginView);
 app.post('/login', authController.ensureAnonymous, authController.login);

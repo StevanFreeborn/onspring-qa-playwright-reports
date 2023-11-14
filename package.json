@@ -6,7 +6,8 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start:prod": "node --experimental-loader=newrelic/esm-loader.mjs server.js",
+    "start:dev": "node server.js",
     "dev": "nodemon -q server.js",
     "link:fix": "eslint --fix .",
     "format:fix": "prettier --write .",
@@ -45,6 +46,7 @@
     "express-session": "^1.17.3",
     "jsdom": "^22.1.0",
     "morgan": "^1.10.0",
+    "newrelic": "^11.5.0",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
     "tiny-csrf": "^1.1.3",

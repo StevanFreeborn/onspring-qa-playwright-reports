@@ -9,7 +9,7 @@
       <h1>Onspring QA Reports</h1>
     </div>
     <div class="form-container">
-      <form action="/login" method="post">
+      <form method="post">
         <section class="form-group">
           <label for="email">Email</label>
           <input id="email" name="email" type="text" autocomplete="email" required autofocus>
@@ -26,10 +26,9 @@
           <%= error %>
         </p>
         <% } %>
-        <button type="submit">Login</button>
+        <button class="login-button" type="submit">Login</button>
       </form>
     </div>
-
   </main>
 </body>
 

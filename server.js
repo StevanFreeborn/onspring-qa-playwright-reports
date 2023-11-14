@@ -49,7 +49,16 @@ app.get('/api/ping', (req, res) => {
 });
 
 app.get('/login', authController.ensureAnonymous, authController.getLoginView);
-app.post('/login', authController.ensureAnonymous, authController.login);
+app.post(
+  '/login',
+  authController.ensureAnonymous,
+  passport.authenticate('local', {
+    failureRedirect: '/login',
+    failureFlash: true,
+    failureMessage: 'Invalid username or password.',
+  }),
+  authController.login
+);
 
 app.get('/', authController.ensureAuthenticated, homeController.getIndexView);
 app.post('/logout', authController.ensureAuthenticated, authController.logout);

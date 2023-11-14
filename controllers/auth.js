@@ -1,5 +1,4 @@
 import express from 'express';
-import passport from 'passport';
 import * as usersService from '../services/users.js';
 
 /**
@@ -37,18 +36,15 @@ export function logout(req, res, next) {
 }
 
 /**
- * @summary Authenticates the user.
+ * @summary Redirects user to correct page after successful authentication.
  * @param {express.Request} req The request object
  * @param {express.Response} res The response object
- * @returns void
+ * @returns {void}
  */
-export const login = passport.authenticate('local', {
-  failureRedirect: '/login',
-  successRedirect: '/',
-  failureFlash: true,
-  failureMessage: 'Invalid username or password.',
-});
-
+export function login(req, res) {
+  const { redirect } = req.query;
+  return res.redirect(redirect || '/');
+}
 /**
  * GET /register
  * Gets the register view.
@@ -104,7 +100,12 @@ export function ensureAuthenticated(req, res, next) {
     return res.status(401).send({ error: 'Unauthorized' });
   }
 
-  return res.redirect('/login');
+  if (req.originalUrl !== '/') {
+    const redirectUrl = encodeURIComponent(req.originalUrl);
+    return res.redirect(`/login?redirect=${redirectUrl}`);
+  }
+
+  return res.redirect(`/login`);
 }
 
 /**

@@ -57,6 +57,7 @@ export function getRegisterView(req, res) {
   const error = messages ? messages[0] : '';
   return res.render('pages/register', {
     title: 'Register',
+    csrfToken: req.csrfToken(),
     error: error,
   });
 }
@@ -70,17 +71,18 @@ export function getRegisterView(req, res) {
 export async function register(req, res) {
   const { email, password, verifyPassword } = req.body;
 
-  const result = await usersService.registerUser(
+  const result = await usersService.registerUser({
     email,
     password,
-    verifyPassword
-  );
+    verifyPassword,
+  });
 
   if (result.isFailed) {
     req.session.messages = [result.error.message];
     return res.redirect('/register');
   }
 
+  req.session.messages = [];
   return res.redirect('/');
 }
 

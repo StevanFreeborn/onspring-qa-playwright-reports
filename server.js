@@ -20,6 +20,7 @@ import { morgan } from './logging/morgan.js';
 const app = express();
 
 app.use(morgan);
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));

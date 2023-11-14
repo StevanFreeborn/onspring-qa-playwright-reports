@@ -8,8 +8,6 @@ export const session = configureSession({
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: 'none',
-    httpOnly: true,
   },
   store: new PrismaSessionStore(prismaClient, {
     checkPeriod: 2 * 60 * 1000,

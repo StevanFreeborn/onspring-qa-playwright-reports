@@ -10,14 +10,14 @@ import { Result } from '../utils/result.js';
  * @param {object} params - The options to use.
  * @param {string} params.email - The user's email address.
  * @param {string} params.password - The user's password.
- * @param {string} params.verifiedPassword - The user's verified password.
+ * @param {string} params.verifyPassword - The user's verified password.
  * @param {PrismaClient} [params.client] - The Prisma client to use.
  * @returns {Promise<Result>} The result of the operation.
  */
 export async function registerUser({
   email,
   password,
-  verifiedPassword,
+  verifyPassword,
   client = prismaClient,
 }) {
   const user = await client.user.findUnique({
@@ -30,7 +30,7 @@ export async function registerUser({
     return Result.failure(new Error('User already exists'));
   }
 
-  if (password !== verifiedPassword) {
+  if (password !== verifyPassword) {
     return Result.failure(new Error('Passwords do not match'));
   }
 

@@ -1,5 +1,4 @@
 import express from 'express';
-import passport from 'passport';
 import * as usersService from '../services/users.js';
 
 /**
@@ -13,6 +12,7 @@ export function getLoginView(req, res) {
   const error = messages ? messages[0] : '';
   return res.render('pages/login', {
     title: 'Login',
+    styles: ['login'],
     csrfToken: req.csrfToken(),
     error: error,
   });
@@ -36,18 +36,15 @@ export function logout(req, res, next) {
 }
 
 /**
- * @summary Authenticates the user.
+ * @summary Redirects user to correct page after successful authentication.
  * @param {express.Request} req The request object
  * @param {express.Response} res The response object
- * @returns void
+ * @returns {void}
  */
-export const login = passport.authenticate('local', {
-  failureRedirect: '/login',
-  successRedirect: '/',
-  failureFlash: true,
-  failureMessage: 'Invalid username or password.',
-});
-
+export function login(req, res) {
+  const { redirect } = req.query;
+  return res.redirect(redirect || '/');
+}
 /**
  * GET /register
  * Gets the register view.
@@ -60,7 +57,9 @@ export function getRegisterView(req, res) {
   const error = messages ? messages[0] : '';
   return res.render('pages/register', {
     title: 'Register',
+    csrfToken: req.csrfToken(),
     error: error,
+    styles: ['register'],
   });
 }
 
@@ -73,17 +72,18 @@ export function getRegisterView(req, res) {
 export async function register(req, res) {
   const { email, password, verifyPassword } = req.body;
 
-  const result = await usersService.registerUser(
+  const result = await usersService.registerUser({
     email,
     password,
-    verifyPassword
-  );
+    verifyPassword,
+  });
 
   if (result.isFailed) {
     req.session.messages = [result.error.message];
     return res.redirect('/register');
   }
 
+  req.session.messages = [];
   return res.redirect('/');
 }
 
@@ -103,7 +103,12 @@ export function ensureAuthenticated(req, res, next) {
     return res.status(401).send({ error: 'Unauthorized' });
   }
 
-  return res.redirect('/login');
+  if (req.originalUrl !== '/') {
+    const redirectUrl = encodeURIComponent(req.originalUrl);
+    return res.redirect(`/login?redirect=${redirectUrl}`);
+  }
+
+  return res.redirect(`/login`);
 }
 
 /**

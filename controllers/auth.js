@@ -13,6 +13,7 @@ export function getLoginView(req, res) {
   const error = messages ? messages[0] : '';
   return res.render('pages/login', {
     title: 'Login',
+    styles: ['login'],
     csrfToken: req.csrfToken(),
     error: error,
   });

@@ -1,6 +1,6 @@
 {
   "javascript.preferences.importModuleSpecifierEnding": "js",
-  "cSpell.words": ["quixo", "resave"],
+  "cSpell.words": ["logtail", "quixo", "resave"],
   "emmet.includeLanguages": {
     "ejs": "html"
   },

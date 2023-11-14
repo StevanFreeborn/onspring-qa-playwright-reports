@@ -1,3 +1,5 @@
+import { Logtail } from '@logtail/node';
+import { LogtailTransport } from '@logtail/winston';
 import express from 'express';
 import winston from 'winston';
 
@@ -63,7 +65,7 @@ const consoleFormat = winston.format.combine(
 /**
  * @summary Defines the logging format for the file.
  */
-const fileFormat = winston.format.combine(
+const jsonFormat = winston.format.combine(
   winston.format.errors({ stack: true }),
   winston.format.json()
 );
@@ -83,15 +85,21 @@ if (process.env.NODE_ENV === 'production') {
     new winston.transports.File({
       filename: 'logs/error.log',
       level: 'error',
-      format: fileFormat,
+      format: jsonFormat,
     })
   );
   transports.push(
     new winston.transports.File({
       filename: 'logs/all.log',
-      format: fileFormat,
+      format: jsonFormat,
     })
   );
+
+  const logtail = new Logtail(process.env.LOGTAIL_SOURCE_TOKEN);
+  const logtailTransport = new LogtailTransport(logtail, {
+    format: jsonFormat,
+  });
+  transports.push(logtailTransport);
 }
 
 export const logger = winston.createLogger({

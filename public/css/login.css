@@ -16,13 +16,16 @@ main {
 form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.form-group:not(:last-of-type) {
+  margin-bottom: 1rem;
 }
 
 .form-group label {
@@ -43,4 +46,24 @@ form {
   border-radius: 6px;
   outline: none;
   box-shadow: var(--color-primer-shadow-inset);
+}
+
+.form-group input:required:invalid {
+  border-left: 1px solid var(--color-checks-ansi-red);
+}
+
+.login-button {
+  border: 0;
+  background: #f7941d;
+  color: #ffffff;
+  padding: 7.5px 15px;
+  border-radius: 3px;
+  max-width: max-content;
+}
+
+.error {
+  color: var(--color-checks-ansi-red);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 1rem;
 }

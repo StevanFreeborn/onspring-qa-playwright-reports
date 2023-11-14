@@ -13,7 +13,7 @@ import { session } from './auth/session.js';
 import * as authController from './controllers/auth.js';
 import * as homeController from './controllers/home.js';
 import { clientErrorHandler } from './errors/client.js';
-import { errorHandler } from './errors/server.js';
+import { errorHandler, notFoundHandler } from './errors/server.js';
 import { logErrors, logger } from './logging/logger.js';
 import { morgan } from './logging/morgan.js';
 
@@ -72,16 +72,7 @@ app.use('/reports', express.static(path.join(process.cwd(), 'reports')));
 app.use(logErrors);
 app.use(clientErrorHandler);
 app.use(errorHandler);
-
-app.use(function (req, res) {
-  if (req.xhr) {
-    return res.status(404).send({ error: 'Not found' });
-  }
-
-  return res
-    .status(404)
-    .render('pages/error404', { title: 'Not Found', csrfToken: '' });
-});
+app.use(notFoundHandler);
 
 const PORT = process.env.PORT || 3000;
 

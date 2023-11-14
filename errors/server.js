@@ -17,3 +17,19 @@ export function errorHandler(error, req, res, next) {
     .status(500)
     .render('pages/error500', { title: 'Error', csrfToken: '' });
 }
+
+/**
+ * @summary Handles errors for undefined routes.
+ * @param {express.Request} req - The request object.
+ * @param {express.Response} res - The response object.
+ * @returns {void}
+ */
+export function notFoundHandler(req, res) {
+  if (req.xhr) {
+    return res.status(404).send({ error: 'Not found' });
+  }
+
+  return res
+    .status(404)
+    .render('pages/error404', { title: 'Not Found', csrfToken: '' });
+}

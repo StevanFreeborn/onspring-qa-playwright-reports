@@ -4,11 +4,10 @@
 <%- include('../partials/_head', { title: title, styles: styles ?? [] }) %>
 
 <body>
+
+  <%- include('../partials/_header') %>
+
   <main>
-    <div class="header-container">
-      <h1>Playwright Reports</h1>
-      <button class="logout-button" type="button" id="logout">Log out</button>
-    </div>
     <div class="chip">
       <div class="chip-header">
         <h3>Reports</h3>

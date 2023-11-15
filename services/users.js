@@ -40,6 +40,15 @@ export async function registerUser({
     data: {
       email,
       passwordHash,
+      userRoles: {
+        create: {
+          role: {
+            connect: {
+              name: 'user',
+            },
+          },
+        },
+      },
     },
   });
 

@@ -192,7 +192,7 @@ export async function register(req, res, next) {
  * @returns {void}
  */
 export function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated() && req.user.roles.includes('user')) {
+  if (req.isAuthenticated()) {
     return next();
   }
 
@@ -209,27 +209,25 @@ export function ensureAuthenticated(req, res, next) {
 }
 
 /**
- * @summary Ensures that the user is an admin.
- * @param {express.Request} req The request object
- * @param {express.Response} res The response object
- * @param {express.NextFunction} next The next function
- * @returns {void}
+ * @summary Ensures that the user has the correct access based on given role.
+ * @param {string} role The role to check for
+ * @returns {Function} The middleware function
  */
-export function ensureAdmin(req, res, next) {
-  if (req.isAuthenticated() && req.user.roles.includes('admin')) {
-    return next();
-  }
+export function ensureAuthorized(role) {
+  return function (req, res, next) {
+    if (req.user.roles.includes(role)) {
+      return next();
+    }
 
-  if (req.xhr) {
-    return res.status(401).send({ error: 'Unauthorized' });
-  }
+    if (req.xhr) {
+      return res.status(403).send({ error: 'Forbidden' });
+    }
 
-  if (req.originalUrl !== '/') {
-    const redirectUrl = encodeURIComponent(req.originalUrl);
-    return res.redirect(`/login?redirect=${redirectUrl}`);
-  }
-
-  return res.redirect(`/login`);
+    return res.status(403).render('pages/error403', {
+      title: 'Forbidden',
+      styles: ['error'],
+    });
+  };
 }
 
 /**
@@ -240,7 +238,10 @@ export function ensureAdmin(req, res, next) {
  * @returns {void}
  */
 export function ensureAnonymous(req, res, next) {
-  if (req.isAuthenticated() === false) {
+  if (
+    req.isAuthenticated() === false ||
+    req.user.roles.includes('user') === false
+  ) {
     return next();
   }
 

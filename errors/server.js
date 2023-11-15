@@ -15,7 +15,7 @@ export function errorHandler(error, req, res, next) {
 
   return res
     .status(500)
-    .render('pages/error500', { title: 'Error', csrfToken: '' });
+    .render('pages/error500', { title: 'Error', styles: ['error'] });
 }
 
 /**
@@ -31,5 +31,5 @@ export function notFoundHandler(req, res) {
 
   return res
     .status(404)
-    .render('pages/error404', { title: 'Not Found', csrfToken: '' });
+    .render('pages/error404', { title: 'Not Found', styles: ['error'] });
 }

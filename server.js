@@ -67,12 +67,7 @@ app.get(
   authController.ensureAuthorized('user'),
   homeController.getIndexView
 );
-app.post(
-  '/logout',
-  authController.ensureAuthenticated,
-  authController.ensureAuthorized('user'),
-  authController.logout
-);
+app.post('/logout', authController.ensureAuthenticated, authController.logout);
 
 app.get(
   '/register',

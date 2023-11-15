@@ -61,19 +61,39 @@ app.get('/api/ping', (req, res) => {
 app.get('/login', authController.ensureAnonymous, authController.getLoginView);
 app.post('/login', authController.ensureAnonymous, authController.login);
 
-app.get('/', authController.ensureAuthenticated, homeController.getIndexView);
-app.post('/logout', authController.ensureAuthenticated, authController.logout);
+app.get(
+  '/',
+  authController.ensureAuthenticated,
+  authController.ensureAuthorized('user'),
+  homeController.getIndexView
+);
+app.post(
+  '/logout',
+  authController.ensureAuthenticated,
+  authController.ensureAuthorized('user'),
+  authController.logout
+);
 
 app.get(
   '/register',
-  authController.ensureAdmin,
+  authController.ensureAuthenticated,
+  authController.ensureAuthorized('admin'),
   authController.getRegisterView
 );
 
-app.post('/register', authController.ensureAdmin, authController.register);
+app.post(
+  '/register',
+  authController.ensureAuthenticated,
+  authController.ensureAuthorized('admin'),
+  authController.register
+);
 
-app.use('/reports', authController.ensureAuthenticated);
-app.use('/reports', express.static(path.join(process.cwd(), 'reports')));
+app.use(
+  '/reports',
+  authController.ensureAuthenticated,
+  authController.ensureAuthorized('user'),
+  express.static(path.join(process.cwd(), 'reports'))
+);
 
 app.use(logErrors);
 app.use(clientErrorHandler);

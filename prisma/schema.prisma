@@ -11,14 +11,30 @@ datasource db {
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  email        String    @unique
+  id           Int         @id @default(autoincrement())
+  email        String      @unique
   passwordHash String
+  userRoles    UserRoles[]
 }
 
 model Session {
-  id          String   @id
-  sid         String   @unique
-  data        String   
-  expiresAt   DateTime
+  id        String   @id
+  sid       String   @unique
+  data      String
+  expiresAt DateTime
+}
+
+model Role {
+  id        Int         @id @default(autoincrement())
+  name      String      @unique
+  userRoles UserRoles[] 
+}
+
+model UserRoles {
+  id     Int @id @default(autoincrement())
+  userId Int
+  roleId Int
+
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
 }

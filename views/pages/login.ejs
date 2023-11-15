@@ -18,13 +18,18 @@
           <label for="password">Password</label>
           <input id="password" name="password" type="password" autocomplete="password" required>
         </section>
-        <section class="form-group">
+        <section>
           <input name="_csrf" value="<%= csrfToken %>" type="hidden" />
         </section>
-        <% if (error) { %>
-        <p class="error">
-          <%= error %>
-        </p>
+        <% if (messages && messages.length) { %>
+        <% messages.forEach(message => { %>
+        <% if (message.type === 'error') { %>
+        <p class="error"><%= message.text %></p>
+        <% } %>
+        <% if (message.type === 'success') { %>
+        <p class="success"><%= message.text %></p>
+        <% } %>
+        <% }) %>
         <% } %>
         <button class="login-button" type="submit">Login</button>
       </form>

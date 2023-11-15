@@ -11,7 +11,6 @@ export const session = configureSession({
     secure: process.env.NODE_ENV === 'production', // HTTPS only in production,
     sameSite: 'strict',
     httpOnly: true,
-    maxAge: 3600000,
   },
   store: new PrismaSessionStore(prismaClient, {
     checkPeriod: 2 * 60 * 1000,

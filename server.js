@@ -20,7 +20,6 @@ import { morgan } from './logging/morgan.js';
 const app = express();
 
 app.use(morgan);
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser(process.env.COOKIE_SECRET));
@@ -42,6 +41,17 @@ app.use(passport.session());
 app.set('view engine', 'ejs');
 app.set('views', path.join(process.cwd(), 'views'));
 
+app.use((req, res, next) => {
+  if (req.session.csrfToken === undefined && req.method === 'GET') {
+    req.session.csrfToken = req.csrfToken();
+  }
+
+  res.locals.csrfToken = req.session.csrfToken;
+  res.locals.messages = req.session.messages || [];
+  res.locals.user = req.user;
+  next();
+});
+
 app.use(express.static(path.join(process.cwd(), 'public')));
 
 app.get('/api/ping', (req, res) => {
@@ -56,15 +66,11 @@ app.post('/logout', authController.ensureAuthenticated, authController.logout);
 
 app.get(
   '/register',
-  authController.ensureAuthenticated,
+  authController.ensureAdmin,
   authController.getRegisterView
 );
 
-app.post(
-  '/register',
-  authController.ensureAuthenticated,
-  authController.register
-);
+app.post('/register', authController.ensureAdmin, authController.register);
 
 app.use('/reports', authController.ensureAuthenticated);
 app.use('/reports', express.static(path.join(process.cwd(), 'reports')));

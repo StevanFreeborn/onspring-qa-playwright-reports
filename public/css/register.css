@@ -55,6 +55,7 @@ form {
   padding: 7.5px 15px;
   border-radius: 3px;
   max-width: max-content;
+  margin-top: 0.5rem;
 }
 
 .error {
@@ -62,4 +63,11 @@ form {
   font-size: 14px;
   font-weight: 500;
   margin-bottom: 1rem;
+}
+
+.success {
+  color: var(--color-checks-ansi-green);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
 }

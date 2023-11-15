@@ -20,23 +20,27 @@ export const localStrategy = new LocalStrategy(
  * @returns {Promise<void>}
  */
 export async function verify(email, password, done) {
-  const user = await prismaClient.user.findUnique({
-    where: {
-      email,
-    },
-  });
+  try {
+    const user = await prismaClient.user.findUnique({
+      where: {
+        email,
+      },
+    });
 
-  if (user === null) {
-    return done(null, false, { message: 'Invalid username or password' });
+    if (user === null) {
+      return done(null, false, { message: 'Invalid username or password' });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+
+    if (isPasswordValid === false) {
+      return done(null, false, { message: 'Invalid username or password' });
+    }
+
+    return done(null, user);
+  } catch (error) {
+    done(error);
   }
-
-  const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-
-  if (isPasswordValid === false) {
-    return done(null, false, { message: 'Invalid username or password' });
-  }
-
-  return done(null, user);
 }
 
 /**
@@ -46,7 +50,11 @@ export async function verify(email, password, done) {
  * @returns {Promise<void>}
  */
 export async function serializeUser(user, done) {
-  return done(null, user.id);
+  try {
+    return done(null, user.id);
+  } catch (error) {
+    return done(error);
+  }
 }
 
 /**
@@ -58,15 +66,32 @@ export async function serializeUser(user, done) {
  * @returns {Promise<void>}
  */
 export async function deserializeUser(id, done) {
-  const user = await prismaClient.user.findUnique({
-    where: {
-      id,
-    },
-  });
+  try {
+    const user = await prismaClient.user.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        userRoles: {
+          select: {
+            role: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
 
-  if (user === null) {
-    return done(null, false);
+    if (user === null) {
+      return done(null, false);
+    }
+
+    user.roles = user.userRoles.map(userRole => userRole.role.name);
+
+    return done(null, user);
+  } catch (error) {
+    return done(error);
   }
-
-  return done(null, user);
 }

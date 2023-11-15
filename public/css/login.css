@@ -65,3 +65,10 @@ form {
   font-weight: 500;
   margin-bottom: 0.25rem;
 }
+
+.success {
+  color: var(--color-checks-ansi-green);
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}

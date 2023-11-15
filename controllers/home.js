@@ -11,7 +11,6 @@ export function getIndexView(req, res) {
   const reports = reportsService.getReportNames();
   res.render('pages/index', {
     title: 'QA Playwright Reports',
-    csrfToken: req.csrfToken(),
     styles: ['index'],
     reports: reports,
   });

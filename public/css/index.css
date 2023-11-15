@@ -6,21 +6,6 @@ main {
   margin-top: 1rem;
 }
 
-.header-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.logout-button {
-  border: 0;
-  background: #f7941d;
-  color: #ffffff;
-  padding: 7.5px 15px;
-  border-radius: 3px;
-  max-width: max-content;
-}
-
 .test-file-test {
   padding: 1rem;
 }

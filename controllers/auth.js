@@ -1,4 +1,6 @@
 import express from 'express';
+import { check, validationResult } from 'express-validator';
+import passport from 'passport';
 import * as usersService from '../services/users.js';
 
 /**
@@ -9,13 +11,68 @@ import * as usersService from '../services/users.js';
  */
 export function getLoginView(req, res) {
   const { messages } = req.session;
-  const error = messages ? messages[0] : '';
   return res.render('pages/login', {
     title: 'Login',
     styles: ['login'],
     csrfToken: req.csrfToken(),
-    error: error,
+    messages: messages,
   });
+}
+
+/**
+ * @summary Redirects user to correct page after successful authentication.
+ * @param {express.Request} req The request object
+ * @param {express.Response} res The response object
+ * @param {express.NextFunction} next The next function
+ * @returns {void}
+ */
+export async function login(req, res, next) {
+  req.session.messages = [];
+  let loginRedirect = '/login';
+  const { redirect } = req.query;
+
+  if (redirect) {
+    loginRedirect += `?redirect=${encodeURIComponent(redirect)}`;
+  }
+
+  await Promise.all([
+    check('email', 'Email is required').notEmpty().escape().run(req),
+    check('password', 'Password is required').notEmpty().escape().run(req),
+  ]);
+
+  const errors = validationResult(req)
+    .formatWith(err => ({ type: 'error', text: err.msg }))
+    .array();
+
+  if (errors.length > 0) {
+    req.session.messages = errors;
+    return res.redirect(loginRedirect);
+  }
+
+  passport.authenticate('local', function (err, user, info) {
+    if (err) {
+      return next(err);
+    }
+
+    if (!user) {
+      req.session.messages = [
+        {
+          type: 'error',
+          text: info.message,
+        },
+      ];
+
+      return res.redirect(loginRedirect);
+    }
+
+    req.logIn(user, function (err) {
+      if (err) {
+        return next(err);
+      }
+
+      return res.redirect(redirect || '/');
+    });
+  })(req, res, next);
 }
 
 /**
@@ -35,16 +92,6 @@ export function logout(req, res, next) {
   });
 }
 
-/**
- * @summary Redirects user to correct page after successful authentication.
- * @param {express.Request} req The request object
- * @param {express.Response} res The response object
- * @returns {void}
- */
-export function login(req, res) {
-  const { redirect } = req.query;
-  return res.redirect(redirect || '/');
-}
 /**
  * GET /register
  * Gets the register view.
@@ -83,7 +130,6 @@ export async function register(req, res) {
     return res.redirect('/register');
   }
 
-  req.session.messages = [];
   return res.redirect('/');
 }
 

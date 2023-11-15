@@ -56,11 +56,12 @@ form {
   padding: 7.5px 15px;
   border-radius: 3px;
   max-width: max-content;
+  margin-top: 0.5rem;
 }
 
 .error {
   color: var(--color-checks-ansi-red);
   font-size: 14px;
   font-weight: 500;
-  margin-bottom: 1rem;
+  margin-bottom: 0.25rem;
 }

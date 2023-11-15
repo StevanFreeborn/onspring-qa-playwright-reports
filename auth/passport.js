@@ -27,7 +27,7 @@ export async function verify(email, password, done) {
   });
 
   if (user === null) {
-    return done(null, false);
+    return done(null, false, { message: 'Invalid username or password' });
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.passwordHash);

@@ -83,13 +83,13 @@ body {
 .nav-link {
   font-size: 14px;
   font-weight: 500;
-  padding: 7.5px 8px;
+  padding: 6px 10px;
   border-radius: 3px;
-  border: 1px solid #181b21;
+  border: 1px solid var(--color-border-default);
 }
 
 .nav-link:hover {
-  background-color: #181b21;
+  background-color: var(--color-canvas-subtle);
 }
 
 .logout-button {

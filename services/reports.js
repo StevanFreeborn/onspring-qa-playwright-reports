@@ -2,7 +2,7 @@ import fs from 'fs';
 
 /**
  * @typedef {object} Report A report.
- * @property {Date} date The date the report was published to the site in UTC.
+ * @property {number} date The date the report was published to the site in ms according to UTC.
  * @property {string} environment The environment the report was generated in.
  * @property {string} status The status of the report.
  */
@@ -20,7 +20,7 @@ export function getReports() {
   const reports = reportNames.map(reportName => {
     const [date, environment, status] = reportName.split('-');
     return {
-      date: new Date(parseInt(date)),
+      date: parseInt(date),
       environment,
       status,
       path: reportName,

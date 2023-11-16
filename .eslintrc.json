@@ -1,4 +1,5 @@
 {
+  "ignorePatterns": ["node_modules/", "reports/"],
   "env": {
     "browser": true,
     "node": true,

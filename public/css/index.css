@@ -7,5 +7,59 @@ main {
 }
 
 .test-file-test {
+  display: flex;
   padding: 1rem;
+  gap: 1rem;
+  font-size: 16px;
+}
+
+.label {
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  text-transform: uppercase;
+}
+
+.alpha {
+  background-color: #4169e185;
+  border: 1px solid #4169e1;
+}
+
+.beta {
+  background-color: #ffa50085;
+  border: 1px solid #ffa500;
+}
+
+.qa {
+  background-color: #da70d685;
+  border: 1px solid #da70d6;
+}
+
+.ist {
+  background-color: #2e1a4785;
+  border: 1px solid #2e1a47;
+}
+
+.vnext {
+  background-color: #00808085;
+  border: 1px solid #008080;
+}
+
+.vprior {
+  background-color: #ff6f6185;
+  border: 1px solid #ff6f61;
+}
+
+.prod {
+  background-color: #da70d685;
+  border: 1px solid #da70d6;
+}
+
+.failure {
+  background-color: #ff000085;
+  border: 1px solid #ff0000;
+}
+
+.success {
+  background-color: #00800085;
+  border: 1px solid green;
 }

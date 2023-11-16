@@ -73,6 +73,10 @@ body {
   margin-top: 1rem;
 }
 
+.header-container h1 {
+  font-size: 1.5rem;
+}
+
 .left-header,
 .right-header {
   display: flex;
@@ -83,13 +87,13 @@ body {
 .nav-link {
   font-size: 14px;
   font-weight: 500;
-  padding: 7.5px 8px;
+  padding: 6px 10px;
   border-radius: 3px;
-  border: 1px solid #181b21;
+  border: 1px solid var(--color-border-default);
 }
 
 .nav-link:hover {
-  background-color: #181b21;
+  background-color: var(--color-canvas-subtle);
 }
 
 .logout-button {
@@ -99,4 +103,60 @@ body {
   padding: 7.5px 15px;
   border-radius: 3px;
   max-width: max-content;
+}
+
+#toggle {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .left-header {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .right-header {
+    overflow: hidden;
+    height: 0;
+    transition: all 1s ease-in;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    flex-shrink: 0;
+    gap: 0;
+  }
+
+  #toggle {
+    display: block;
+  }
+
+  .show {
+    height: max-content;
+  }
+
+  .right-header>* {
+    flex-shrink: 0;
+    width: 100%;
+    text-align: right;
+  }
+
+  .nav-link {
+    border: none;
+  }
+
+  .nav-link:last-of-type {
+    margin-bottom: 0.5rem;
+  }
+
+  .logout-button {
+    margin-right: 10px;
+    margin-bottom: 0.75rem;
+  }
 }

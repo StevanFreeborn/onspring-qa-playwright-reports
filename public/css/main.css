@@ -100,3 +100,59 @@ body {
   border-radius: 3px;
   max-width: max-content;
 }
+
+#toggle {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .left-header {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .right-header {
+    overflow: hidden;
+    height: 0;
+    transition: all 1s ease-in;
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    flex-shrink: 0;
+    gap: 0;
+  }
+
+  #toggle {
+    display: block;
+  }
+
+  .show {
+    height: max-content;
+  }
+
+  .right-header>* {
+    flex-shrink: 0;
+    width: 100%;
+    text-align: right;
+  }
+
+  .nav-link {
+    border: none;
+  }
+
+  .nav-link:last-of-type {
+    margin-bottom: 0.5rem;
+  }
+
+  .logout-button {
+    margin-right: 10px;
+    margin-bottom: 0.75rem;
+  }
+}

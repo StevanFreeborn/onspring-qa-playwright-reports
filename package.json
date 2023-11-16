@@ -12,7 +12,7 @@
     "format:fix": "prettier --write .",
     "migrate": "prisma migrate dev",
     "studio": "prisma studio",
-    "build": "npm add -D prisma && npm install && prisma migrate deploy && prisma generate",
+    "build": "npm add -D prisma && npm install --ignore-scripts && prisma migrate deploy && prisma generate",
     "prepare": "husky install"
   },
   "prisma": {

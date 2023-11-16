@@ -189,78 +189,79 @@ export async function register(req, res, next) {
 }
 
 // TODO: Repurpose this into set password method
-// export async function register(req, res, next) {
-//   try {
-//     await Promise.all([
-//       check('email', 'Email is required and should be a valid email')
-//         .notEmpty()
-//         .isEmail()
-//         .escape()
-//         .run(req),
-//       check(
-//         'password',
-//         'Password is required and should contain at least 8 characters, 1 lowercase letter, 1 uppercase letter, 1 number, and 1 symbol'
-//       )
-//         .notEmpty()
-//         .isStrongPassword({
-//           minLength: 8,
-//           minLowercase: 1,
-//           minUppercase: 1,
-//           minNumbers: 1,
-//           minSymbols: 1,
-//         })
-//         .escape()
-//         .run(req),
-//       check('verifyPassword', 'Verify password is required')
-//         .notEmpty()
-//         .escape()
-//         .run(req),
-//     ]);
+export async function setPassword(req, res, next) {
+  const { token } = req.query;
+  try {
+    await Promise.all([
+      check('email', 'Email is required and should be a valid email')
+        .notEmpty()
+        .isEmail()
+        .escape()
+        .run(req),
+      check(
+        'password',
+        'Password is required and should contain at least 8 characters, 1 lowercase letter, 1 uppercase letter, 1 number, and 1 symbol'
+      )
+        .notEmpty()
+        .isStrongPassword({
+          minLength: 8,
+          minLowercase: 1,
+          minUppercase: 1,
+          minNumbers: 1,
+          minSymbols: 1,
+        })
+        .escape()
+        .run(req),
+      check('verifyPassword', 'Verify password is required')
+        .notEmpty()
+        .escape()
+        .run(req),
+    ]);
 
-//     const errors = validationResult(req)
-//       .formatWith(err => err.msg)
-//       .array();
+    const errors = validationResult(req)
+      .formatWith(err => err.msg)
+      .array();
 
-//     if (errors.length > 0) {
-//       return res.status(400).render('pages/register', {
-//         title: 'Register',
-//         styles: ['register'],
-//         formData: {
-//           email: req.body.email,
-//           password: req.body.password,
-//           verifyPassword: req.body.verifyPassword,
-//         },
-//         errors: errors,
-//       });
-//     }
+    if (errors.length > 0) {
+      return res.status(400).render('pages/setPassword', {
+        title: 'Set Password',
+        styles: ['set-password'],
+        formData: {
+          email: req.body.email,
+          password: req.body.password,
+          verifyPassword: req.body.verifyPassword,
+        },
+        errors: errors,
+      });
+    }
 
-//     const { email, password, verifyPassword } = matchedData(req);
+    const { email, password, verifyPassword } = matchedData(req);
 
-//     const result = await usersService.registerUser({
-//       email,
-//       password,
-//       verifyPassword,
-//     });
+    const result = await usersService.registerUser({
+      email,
+      password,
+      verifyPassword,
+    });
 
-//     if (result.isFailed) {
-//       errors.push(result.error.message);
-//       return res.status(400).render('pages/register', {
-//         title: 'Register',
-//         styles: ['register'],
-//         formData: {
-//           email: req.body.email,
-//           password: req.body.password,
-//           verifyPassword: req.body.verifyPassword,
-//         },
-//         errors: errors,
-//       });
-//     }
+    if (result.isFailed) {
+      errors.push(result.error.message);
+      return res.status(400).render('pages/setPassword', {
+        title: 'Set Password',
+        styles: ['set-password'],
+        formData: {
+          email: req.body.email,
+          password: req.body.password,
+          verifyPassword: req.body.verifyPassword,
+        },
+        errors: errors,
+      });
+    }
 
-//     return res.redirect('/register?success=true');
-//   } catch (error) {
-//     return next(error);
-//   }
-// }
+    return res.redirect('/login');
+  } catch (error) {
+    return next(error);
+  }
+}
 
 /**
  * @summary Ensures that the user is authenticated.

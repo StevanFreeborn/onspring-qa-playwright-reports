@@ -9,7 +9,7 @@ export const session = configureSession({
   proxy: process.env.NODE_ENV === 'production',
   cookie: {
     secure: process.env.NODE_ENV === 'production', // HTTPS only in production,
-    sameSite: 'strict',
+    sameSite: 'lax',
     httpOnly: true,
   },
   store: new PrismaSessionStore(prismaClient, {

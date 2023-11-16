@@ -12,23 +12,18 @@
       <form method="post">
         <section class="form-group">
           <label for="email">Email</label>
-          <input id="email" name="email" type="text" autocomplete="email" required autofocus>
+          <input value="<%= locals.formData?.email ?? '' %>" id="email" name="email" type="text" autocomplete="email" required autofocus>
         </section>
         <section class="form-group">
           <label for="password">Password</label>
-          <input id="password" name="password" type="password" autocomplete="password" required>
+          <input value="<%= locals.formData?.password ?? '' %>" id="password" name="password" type="password" autocomplete="password" required>
         </section>
         <section>
           <input name="_csrf" value="<%= csrfToken %>" type="hidden" />
         </section>
-        <% if (messages && messages.length) { %>
-        <% messages.forEach(message => { %>
-        <% if (message.type === 'error') { %>
-        <p class="error"><%= message.text %></p>
-        <% } %>
-        <% if (message.type === 'success') { %>
-        <p class="success"><%= message.text %></p>
-        <% } %>
+        <% if (locals.errors && errors.length) { %>
+        <% errors.forEach(error => { %>
+        <p class="error"><%= error %></p>
         <% }) %>
         <% } %>
         <button class="login-button" type="submit">Login</button>

@@ -25,13 +25,7 @@ export function getLoginView(req, res) {
  */
 export async function login(req, res, next) {
   try {
-    req.session.messages = [];
-    let loginRedirect = '/login';
     const { redirect } = req.query;
-
-    if (redirect) {
-      loginRedirect += `?redirect=${encodeURIComponent(redirect)}`;
-    }
 
     await Promise.all([
       check('email', 'Email is required').notEmpty().escape().run(req),
@@ -43,8 +37,15 @@ export async function login(req, res, next) {
       .array();
 
     if (errors.length > 0) {
-      req.session.messages = errors;
-      return res.redirect(loginRedirect);
+      return res.status(400).render('pages/login', {
+        title: 'Login',
+        styles: ['login'],
+        formData: {
+          email: req.body.email,
+          password: req.body.password,
+        },
+        errors: errors,
+      });
     }
 
     passport.authenticate('local', function (err, user, info) {
@@ -53,14 +54,16 @@ export async function login(req, res, next) {
       }
 
       if (!user) {
-        req.session.messages = [
-          {
-            type: 'error',
-            text: info.message,
+        errors.push(info.message);
+        return res.status(400).render('pages/login', {
+          title: 'Login',
+          styles: ['login'],
+          formData: {
+            email: req.body.email,
+            password: req.body.password,
           },
-        ];
-
-        return res.redirect(loginRedirect);
+          errors: errors,
+        });
       }
 
       req.logIn(user, function (err) {

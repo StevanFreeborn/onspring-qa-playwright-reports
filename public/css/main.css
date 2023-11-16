@@ -141,7 +141,7 @@ body {
     height: max-content;
   }
 
-  .right-header>* {
+  .right-header > * {
     flex-shrink: 0;
     width: 100%;
     text-align: right;

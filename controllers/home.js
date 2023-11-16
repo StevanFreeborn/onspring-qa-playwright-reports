@@ -8,7 +8,7 @@ import * as reportsService from '../services/reports.js';
  * @returns {void}
  */
 export function getIndexView(req, res) {
-  const reports = reportsService.getReportNames();
+  const reports = reportsService.getReports();
   res.render('pages/index', {
     title: 'QA Playwright Reports',
     styles: ['index'],

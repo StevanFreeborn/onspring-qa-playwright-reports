@@ -26,6 +26,9 @@ async function addRoles() {
   }
 }
 
+/**
+ *
+ */
 async function updateUsersWithUserRole() {
   const users = await prisma.user.findMany();
   const role = await prisma.role.findUnique({

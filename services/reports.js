@@ -1,10 +1,31 @@
 import fs from 'fs';
 
 /**
- * @summary Gets the names of the reports.
- * @returns {string[]} The names of the reports.
+ * @typedef {object} Report A report.
+ * @property {Date} date The date the report was published to the site in UTC.
+ * @property {string} environment The environment the report was generated in.
+ * @property {string} status The status of the report.
  */
-export function getReportNames() {
+
+/**
+ * @summary Gets the test reports.
+ * @returns {Array<Report>} The test reports.
+ */
+export function getReports() {
+  // report directory names have
+  // the format {date in ms}-{environment}-{status}
+  // this is currently enforced by the test CI workflow
+  // maybe we use database in future?
   const reportNames = fs.readdirSync('./reports');
-  return reportNames.reverse();
+  const reports = reportNames.map(reportName => {
+    const [date, environment, status] = reportName.split('-');
+    return {
+      date: new Date(parseInt(date)),
+      environment,
+      status,
+      path: reportName,
+    };
+  });
+
+  return reports.reverse();
 }

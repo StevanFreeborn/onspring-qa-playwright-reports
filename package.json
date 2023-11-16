@@ -12,7 +12,8 @@
     "format:fix": "prettier --write .",
     "migrate": "prisma migrate dev",
     "studio": "prisma studio",
-    "build": "npm add -D prisma && npm install && prisma migrate deploy && prisma generate"
+    "build": "npm add -D prisma && npm install && prisma migrate deploy && prisma generate",
+    "prepare": "husky install"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -32,6 +33,7 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-jsdoc": "^46.9.0",
     "eslint-plugin-prettier": "^5.0.1",
+    "husky": "^8.0.3",
     "nodemon": "^3.0.1",
     "prettier": "^3.1.0",
     "prisma": "^5.6.0"

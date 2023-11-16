@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<%- include('../partials/_head', { title: title, styles: styles ?? [] }) %>
+<%- include('../partials/_head', { title: locals.title, styles: locals.styles, scripts: locals.scripts }) %>
 
 <body>
 
@@ -18,7 +18,7 @@
           <% reports.forEach(report => { %>
           <div class="test-file-test">
             <a href="/reports/<%= report.path %>">
-              Playwright Report <%= report.date.toLocaleString() %>
+              Playwright Report <span class="report-date" data-date-in-ms="<%= report.date %>"><%= new Date(report.date).toLocaleString() %></span>
             </a>
             <span class="label <%= report.environment.toLowerCase() %>">
               <%= report.environment %>

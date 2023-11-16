@@ -33,7 +33,7 @@ export async function login(req, res, next) {
     ]);
 
     const errors = validationResult(req)
-      .formatWith(err => ({ type: 'error', text: err.msg }))
+      .formatWith(err => err.msg)
       .array();
 
     if (errors.length > 0) {
@@ -104,9 +104,11 @@ export function logout(req, res, next) {
  * @returns {void}
  */
 export function getRegisterView(req, res) {
+  const { success } = req.query;
   return res.render('pages/register', {
     title: 'Register',
     styles: ['register'],
+    success: success,
   });
 }
 
@@ -119,8 +121,6 @@ export function getRegisterView(req, res) {
  */
 export async function register(req, res, next) {
   try {
-    req.session.messages = [];
-
     await Promise.all([
       check('email', 'Email is required and should be a valid email')
         .notEmpty()
@@ -148,12 +148,20 @@ export async function register(req, res, next) {
     ]);
 
     const errors = validationResult(req)
-      .formatWith(err => ({ type: 'error', text: err.msg }))
+      .formatWith(err => err.msg)
       .array();
 
     if (errors.length > 0) {
-      req.session.messages = errors;
-      return res.redirect('/register');
+      return res.status(400).render('pages/register', {
+        title: 'Register',
+        styles: ['register'],
+        formData: {
+          email: req.body.email,
+          password: req.body.password,
+          verifyPassword: req.body.verifyPassword,
+        },
+        errors: errors,
+      });
     }
 
     const { email, password, verifyPassword } = matchedData(req);
@@ -165,23 +173,20 @@ export async function register(req, res, next) {
     });
 
     if (result.isFailed) {
-      req.session.messages = [
-        {
-          type: 'error',
-          text: result.error.message,
+      errors.push(result.error.message);
+      return res.status(400).render('pages/register', {
+        title: 'Register',
+        styles: ['register'],
+        formData: {
+          email: req.body.email,
+          password: req.body.password,
+          verifyPassword: req.body.verifyPassword,
         },
-      ];
-      return res.redirect('/register');
+        errors: errors,
+      });
     }
 
-    req.session.messages = [
-      {
-        type: 'success',
-        text: 'User registered successfully',
-      },
-    ];
-
-    return res.redirect('/register');
+    return res.redirect('/register?success=true');
   } catch (error) {
     return next(error);
   }

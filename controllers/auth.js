@@ -3,6 +3,7 @@ import { randomInt } from 'crypto';
 import express from 'express';
 import { check, matchedData, validationResult } from 'express-validator';
 import passport from 'passport';
+import * as emailService from '../services/email.js';
 import * as usersService from '../services/users.js';
 
 /**
@@ -148,13 +149,13 @@ export async function register(req, res, next) {
 
     const { email } = matchedData(req);
 
-    const result = await usersService.registerUser({
+    const registerResult = await usersService.registerUser({
       email,
       password: generatePassword(),
     });
 
-    if (result.isFailed) {
-      errors.push(result.error.message);
+    if (registerResult.isFailed) {
+      errors.push(registerResult.error.message);
       return res.status(400).render('pages/register', {
         title: 'Register',
         styles: ['register'],
@@ -162,6 +163,22 @@ export async function register(req, res, next) {
           email: req.body.email,
         },
         errors: errors,
+      });
+    }
+
+    const emailResult = await emailService.sendNewAccountEmail({
+      user: registerResult.value,
+      baseUrl: `${req.protocol}://${req.get('host')}`,
+    });
+
+    if (emailResult.isFailed) {
+      return res.status(500).render('pages/register', {
+        title: 'Register',
+        styles: ['register'],
+        formData: {
+          email: req.body.email,
+        },
+        errors: ['User created but new account email failed to send.'],
       });
     }
 

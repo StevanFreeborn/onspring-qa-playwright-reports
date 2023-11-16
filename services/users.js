@@ -1,6 +1,7 @@
 /**
  * @typedef { import("@prisma/client").PrismaClient } PrismaClient
  */
+
 import bcrypt from 'bcrypt';
 import { prismaClient } from '../data/prisma.js';
 import { Result } from '../utils/result.js';

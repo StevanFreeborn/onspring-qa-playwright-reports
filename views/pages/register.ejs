@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<%- include('../partials/_head', { title: title, styles: styles ?? [] }) %>
+<%- include('../partials/_head', { title: locals.title, styles: locals.styles, scripts: locals.scripts }) %>
 
 <body>
 
@@ -12,31 +12,29 @@
       <h2>Register User</h2>
     </div>
     <div class="form-container">
-      <form method="post">
+      <form action="/register" method="post">
         <section class="form-group">
           <label for="email">Email:</label>
-          <input type="email" name="email" id="email" required>
+          <input value="<%= locals.formData?.email %>" type="email" name="email" id="email" required>
         </section>
         <section class="form-group">
           <label for="password">Password:</label>
-          <input type="password" name="password" id="password" required>
+          <input value="<%= locals.formData?.password %>" type="password" name="password" id="password" required>
         </section>
         <section class="form-group">
           <label for="verifyPassword">Verify Password:</label>
-          <input type="password" name="verifyPassword" id="verifyPassword" required>
+          <input value="<%= locals.formData?.verifyPassword %>" type="password" name="verifyPassword" id="verifyPassword" required>
         </section>
         <section>
           <input name="_csrf" value="<%= csrfToken %>" type="hidden" />
         </section>
-        <% if (messages && messages.length) { %>
-        <% messages.forEach(message => { %>
-        <% if (message.type === 'error') { %>
-        <p class="error"><%= message.text %></p>
-        <% } %>
-        <% if (message.type === 'success') { %>
-        <p class="success"><%= message.text %></p>
-        <% } %>
+        <% if (locals.errors && errors.length) { %>
+        <% errors.forEach(error => { %>
+        <p class="error"><%= error %></p>
         <% }) %>
+        <% } %>
+        <% if (locals.success) { %>
+        <p class="success">User successfully registered!</p>
         <% } %>
         <button type="submit" class="register-button">Register</button>
       </form>

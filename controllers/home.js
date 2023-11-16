@@ -12,6 +12,7 @@ export function getIndexView(req, res) {
   res.render('pages/index', {
     title: 'QA Playwright Reports',
     styles: ['index'],
+    scripts: ['index'],
     reports: reports,
   });
 }

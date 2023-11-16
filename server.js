@@ -47,7 +47,6 @@ app.use((req, res, next) => {
   }
 
   res.locals.csrfToken = req.session.csrfToken;
-  res.locals.messages = req.session.messages || [];
   res.locals.user = req.user;
   next();
 });

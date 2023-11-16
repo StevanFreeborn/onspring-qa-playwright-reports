@@ -73,6 +73,10 @@ body {
   margin-top: 1rem;
 }
 
+.header-container h1 {
+  font-size: 1.5rem;
+}
+
 .left-header,
 .right-header {
   display: flex;

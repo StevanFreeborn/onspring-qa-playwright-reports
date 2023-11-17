@@ -16,6 +16,8 @@
     <% if (locals.user && user.roles.includes('admin')) { %>
     <a class="nav-link" href="/register">Add User</a>
     <% } %>
-    <button class="logout-button" type="button" id="logout">Log out</button>
+    <% if (locals.user) { %>
+    <button class="logout-button" type="button" id="logout">Logout</button>
+    <% } %>
   </div>
 </header>

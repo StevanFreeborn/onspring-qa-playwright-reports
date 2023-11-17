@@ -53,13 +53,25 @@ winston.addColors(colors);
  * @summary Defines the logging format for the console.
  */
 const consoleFormat = winston.format.combine(
+  winston.format.errors({ stack: true }),
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
   winston.format.colorize({ all: true }),
-  winston.format.printf(
-    info => `${info.timestamp} ${info.level}: ${info.message}`
-  ),
   winston.format.align(),
-  winston.format.errors({ stack: true })
+  winston.format.metadata({
+    fillExcept: ['message', 'level', 'timestamp', 'label'],
+  }),
+  winston.format.printf(info => {
+    if (info instanceof Error) {
+      return `${info.timestamp} [${info.label}] ${info.level}: ${info.message} ${info.stack}`;
+    }
+
+    const hasMetadata = Object.keys(info.metadata).length > 0;
+    const metadataString = hasMetadata
+      ? ', ' + JSON.stringify(info.metadata)
+      : '';
+
+    return `${info.timestamp} ${info.level}: ${info.message}${metadataString}`;
+  })
 );
 
 /**
@@ -67,6 +79,9 @@ const consoleFormat = winston.format.combine(
  */
 const jsonFormat = winston.format.combine(
   winston.format.errors({ stack: true }),
+  winston.format.metadata({
+    fillExcept: ['message', 'level', 'timestamp', 'label'],
+  }),
   winston.format.json()
 );
 
@@ -117,6 +132,9 @@ export const logger = winston.createLogger({
  * @returns {void}
  */
 export function logErrors(error, req, res, next) {
-  logger.error('error', error);
+  logger.error('error', {
+    message: error.message,
+    stack: error.stack,
+  });
   next(error);
 }

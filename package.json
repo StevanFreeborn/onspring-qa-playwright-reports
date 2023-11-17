@@ -9,7 +9,7 @@
     "start": "node server.js",
     "dev": "cross-env TZ=utc nodemon -q server.js",
     "lint:fix": "eslint --fix .",
-    "format:fix": "prettier --write .",
+    "format:fix": "prettier --log-level silent --write .",
     "migrate": "prisma migrate dev",
     "studio": "prisma studio",
     "build": "npm add -D prisma && npm install --ignore-scripts && prisma migrate deploy && prisma generate",
@@ -29,16 +29,16 @@
   },
   "license": "ISC",
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "eslint": "^8.53.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-jsdoc": "^46.9.0",
     "eslint-plugin-prettier": "^5.0.1",
     "husky": "^8.0.3",
+    "jsdom": "^22.1.0",
     "nodemon": "^3.0.1",
     "prettier": "^3.1.0",
-    "prisma": "^5.6.0",
-    "cross-env": "^7.0.3",
-    "jsdom": "^22.1.0"
+    "prisma": "^5.6.0"
   },
   "dependencies": {
     "@logtail/node": "^0.4.16",

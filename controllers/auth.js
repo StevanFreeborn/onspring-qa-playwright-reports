@@ -3,6 +3,7 @@ import { randomInt } from 'crypto';
 import express from 'express';
 import { check, matchedData, validationResult } from 'express-validator';
 import passport from 'passport';
+import { logger } from '../logging/logger.js';
 import * as emailService from '../services/email.js';
 import * as usersService from '../services/users.js';
 
@@ -188,9 +189,46 @@ export async function register(req, res, next) {
   }
 }
 
-// TODO: Repurpose this into set password method
-export async function setPassword(req, res, next) {
+/**
+ * @summary Gets the set password view.
+ * @param {express.Request} req The request object
+ * @param {express.Response} res The response object
+ * @param {express.NextFunction} next The next function
+ * @returns {void}
+ */
+export async function getSetPasswordView(req, res, next) {
   const { token } = req.query;
+  try {
+    const result = await usersService.getUserByToken(token);
+
+    if (result.isFailed) {
+      return res.render('pages/setPassword', {
+        title: 'Set Password',
+        styles: ['error'],
+        errors: [result.error.message],
+      });
+    }
+
+    return res.render('pages/setPassword', {
+      title: 'Set Password',
+      styles: ['set-password'],
+      formData: {
+        email: result.value.email,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
+ * @summary Sets the user's password.
+ * @param {express.Request} req The request object
+ * @param {express.Response} res The response object
+ * @param {express.NextFunction} next The next function
+ * @returns {void}
+ */
+export async function setPassword(req, res, next) {
   try {
     await Promise.all([
       check('email', 'Email is required and should be a valid email')
@@ -216,6 +254,7 @@ export async function setPassword(req, res, next) {
         .notEmpty()
         .escape()
         .run(req),
+      check('token', 'Token is required').notEmpty().escape().run(req),
     ]);
 
     const errors = validationResult(req)
@@ -235,16 +274,18 @@ export async function setPassword(req, res, next) {
       });
     }
 
-    const { email, password, verifyPassword } = matchedData(req);
+    const { email, password, verifyPassword, token } = matchedData(req);
 
-    const result = await usersService.registerUser({
+    const result = await usersService.updateUserPassword({
       email,
       password,
       verifyPassword,
+      token,
     });
 
     if (result.isFailed) {
-      errors.push(result.error.message);
+      logger.error(result.error.message);
+      errors.push('Unable to set password');
       return res.status(400).render('pages/setPassword', {
         title: 'Set Password',
         styles: ['set-password'],
@@ -258,6 +299,73 @@ export async function setPassword(req, res, next) {
     }
 
     return res.redirect('/login');
+  } catch (error) {
+    return next(error);
+  }
+}
+
+/**
+ * @summary Gets the forgot password view.
+ * @param {express.Request} req The request object
+ * @param {express.Response} res The response object
+ * @returns {void}
+ */
+export function getForgotPasswordView(req, res) {
+  const { success } = req.query;
+  return res.render('pages/forgotPassword', {
+    title: 'Forgot Password',
+    styles: ['forgot-password'],
+    success: success,
+  });
+}
+
+/**
+ * @summary Sends a forgot password email to the user.
+ * @param {express.Request} req The request object
+ * @param {express.Response} res The response object
+ * @param {express.NextFunction} next The next function
+ * @returns {void}
+ */
+export async function forgotPassword(req, res, next) {
+  try {
+    await Promise.all([
+      check('email', 'Email is required and should be a valid email')
+        .notEmpty()
+        .isEmail()
+        .escape()
+        .run(req),
+    ]);
+
+    const errors = validationResult(req)
+      .formatWith(err => err.msg)
+      .array();
+
+    if (errors.length > 0) {
+      return res.status(400).render('pages/forgotPassword', {
+        title: 'Forgot Password',
+        styles: ['forgot-password'],
+        formData: {
+          email: req.body.email,
+        },
+        errors: errors,
+      });
+    }
+
+    const { email } = matchedData(req);
+
+    const userResult = await usersService.getUserByEmail({ email });
+
+    if (userResult.isSuccess) {
+      await emailService.sendForgotPasswordEmail({
+        user: userResult.value,
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+      });
+    } else {
+      // Simulate email sending to prevent user enumeration
+      await new Promise(resolve => setTimeout(resolve, 2000));
+    }
+
+    return res.redirect('/forgot-password?success=true');
   } catch (error) {
     return next(error);
   }

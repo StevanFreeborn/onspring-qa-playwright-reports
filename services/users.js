@@ -97,7 +97,7 @@ export async function updateUserPassword({
       email,
     },
     include: {
-      passwordToken: true,
+      passwordTokens: true,
     },
   });
 
@@ -105,7 +105,7 @@ export async function updateUserPassword({
     return Result.failure(new Error('User not found'));
   }
 
-  const userToken = user.passwordToken.find(t => t.token === token);
+  const userToken = user.passwordTokens.find(t => t.token === token);
 
   if (userToken === undefined || userToken.expiresAt < Date.now()) {
     return Result.failure(new Error('Invalid token'));
@@ -163,9 +163,18 @@ export async function updateUserPassword({
  * @returns {Promise<Result>} The result of the operation.
  */
 export async function getUserByEmail({ email, client = prismaClient }) {
-  const user = await client.user.findUnique({
+  const user = await client.user.findFirst({
     where: {
       email,
+    },
+    include: {
+      passwordTokens: {
+        where: {
+          expiresAt: {
+            gt: Date.now(),
+          },
+        },
+      },
     },
   });
 

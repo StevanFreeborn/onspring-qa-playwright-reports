@@ -204,7 +204,7 @@ export async function getSetPasswordView(req, res, next) {
     if (result.isFailed) {
       return res.render('pages/setPassword', {
         title: 'Set Password',
-        styles: ['error'],
+        styles: ['set-password'],
         errors: [result.error.message],
       });
     }
@@ -354,13 +354,21 @@ export async function forgotPassword(req, res, next) {
     const { email } = matchedData(req);
 
     const userResult = await usersService.getUserByEmail({ email });
+    const hasPasswordToken = userResult.value.passwordTokens?.length > 0;
 
-    if (userResult.isSuccess) {
+    if (userResult.isSuccess && hasPasswordToken === false) {
       await emailService.sendForgotPasswordEmail({
         user: userResult.value,
         baseUrl: `${req.protocol}://${req.get('host')}`,
       });
     } else {
+      logger.info(
+        'User not found or already has password token. Skipping email send.',
+        {
+          userResult: userResult.isSuccess,
+          hasPasswordToken,
+        }
+      );
       // Simulate email sending to prevent user enumeration
       await new Promise(resolve => setTimeout(resolve, 2000));
     }

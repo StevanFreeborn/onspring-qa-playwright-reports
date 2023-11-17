@@ -122,9 +122,25 @@ export async function updateUserPassword({
     },
   });
 
-  await client.passwordToken.delete({
+  await client.passwordToken.deleteMany({
     where: {
-      id: userToken.id,
+      OR: [
+        {
+          AND: [
+            {
+              expiresAt: {
+                lte: Date.now(),
+              },
+            },
+            {
+              userId: updatedUser.id,
+            },
+          ],
+        },
+        {
+          id: userToken.id,
+        },
+      ],
     },
   });
 

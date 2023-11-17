@@ -1,6 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('logout').addEventListener('click', logOutUser);
-  document.getElementById('toggle').addEventListener('click', toggleNav);
+  const logoutButton = document.getElementById('logout');
+  const toggleButton = document.getElementById('toggle');
+
+  if (logoutButton) {
+    logoutButton.addEventListener('click', logOutUser);
+  }
+
+  if (toggleButton) {
+    toggleButton.addEventListener('click', toggleNav);
+  }
 
   const csrfToken = document
     .querySelector('meta[name="csrf-token"]')

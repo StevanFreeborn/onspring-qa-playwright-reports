@@ -58,6 +58,6 @@ async function addHeadPartial(reportDom) {
   const headContent = await ejs.renderFile(headPath);
   const dom = reportDom.window.document;
   const head = dom.querySelector('head');
-  head.append(new JSDOM(headContent).window.document.querySelector('head'));
+  head.prepend(new JSDOM(headContent).window.document.querySelector('head'));
   return reportDom;
 }

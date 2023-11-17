@@ -9,10 +9,10 @@ import { Result } from '../utils/result.js';
 
 /**
  * @summary Registers a new user
- * @param {object} params - The params to use.
- * @param {string} params.email - The user's email address.
- * @param {string} params.password - The user's password.
- * @param {PrismaClient} [params.client] - The Prisma client to use.
+ * @param {object} params The params to use.
+ * @param {string} params.email The user's email address.
+ * @param {string} params.password The user's password.
+ * @param {PrismaClient} [params.client] The Prisma client to use.
  * @returns {Promise<Result>} The result of the operation.
  */
 export async function registerUser({ email, password, client = prismaClient }) {
@@ -49,9 +49,9 @@ export async function registerUser({ email, password, client = prismaClient }) {
 
 /**
  * @summary Retrieves the user related to the provided token
- * @param {object} params - The params to use.
- * @param {string} params.token - The user's token.
- * @param {PrismaClient} [params.client] - The Prisma client to use.
+ * @param {object} params The params to use.
+ * @param {string} params.token The user's token.
+ * @param {PrismaClient} [params.client] The Prisma client to use.
  * @returns {Promise<Result>} The result of the operation.
  */
 export async function getUserByToken({ token, client = prismaClient }) {
@@ -73,12 +73,12 @@ export async function getUserByToken({ token, client = prismaClient }) {
 
 /**
  * @summary Updates the user's password
- * @param {object} params - The params to use.
- * @param {string} params.email - The user's email address.
- * @param {string} params.password - The user's password.
- * @param {string} params.verifyPassword - The user's verified password.
- * @param {string} params.token - The user's token.
- * @param {PrismaClient} [params.client] - The Prisma client to use.
+ * @param {object} params The params to use.
+ * @param {string} params.email The user's email address.
+ * @param {string} params.password The user's password.
+ * @param {string} params.verifyPassword The user's verified password.
+ * @param {string} params.token The user's token.
+ * @param {PrismaClient} [params.client] The Prisma client to use.
  * @returns {Promise<Result>} The result of the operation.
  */
 export async function updateUserPassword({
@@ -157,9 +157,9 @@ export async function updateUserPassword({
 
 /**
  * @summary Retrieves the user by email
- * @param {object} params - The params to use.
- * @param {string} params.email - The user's email.
- * @param {PrismaClient} [params.client] - The Prisma client to use.
+ * @param {object} params The params to use.
+ * @param {string} params.email The user's email.
+ * @param {PrismaClient} [params.client] The Prisma client to use.
  * @returns {Promise<Result>} The result of the operation.
  */
 export async function getUserByEmail({ email, client = prismaClient }) {

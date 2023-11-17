@@ -12,6 +12,7 @@ import {
 import { session } from './auth/session.js';
 import * as authController from './controllers/auth.js';
 import * as homeController from './controllers/home.js';
+import * as reportsController from './controllers/reports.js';
 import { clientErrorHandler } from './errors/client.js';
 import { errorHandler, notFoundHandler } from './errors/server.js';
 import { logErrors, logger } from './logging/logger.js';
@@ -89,11 +90,13 @@ app.get('/forgot-password', authController.getForgotPasswordView);
 app.post('/forgot-password', authController.forgotPassword);
 
 app.use(
-  '/reports',
+  '/reports/:name',
   authController.ensureAuthenticated,
   authController.ensureAuthorized('user'),
-  express.static(path.join(process.cwd(), 'reports'))
+  reportsController.getReport
 );
+
+app.use('/reports', homeController.getIndexView);
 
 app.use(logErrors);
 app.use(clientErrorHandler);

@@ -10,10 +10,10 @@ import { Result } from '../utils/result.js';
 
 /**
  * @summary Sends a new account email to the user.
- * @param {object} params - The options to use.
- * @param {User} params.user - The user to send the email to.
- * @param {string} params.baseUrl - The base URL to use for the link.
- * @param {PrismaClient} [params.client] - The Prisma client to use.
+ * @param {object} params The options to use.
+ * @param {User} params.user The user to send the email to.
+ * @param {string} params.baseUrl The base URL to use for the link.
+ * @param {PrismaClient} [params.client] The Prisma client to use.
  * @returns {Promise<Result>} The result of the operation.
  */
 export async function sendNewAccountEmail({
@@ -60,10 +60,10 @@ export async function sendNewAccountEmail({
 
 /**
  * @summary Sends a forgot password email to the user.
- * @param {object} params - The options to use.
- * @param {User} params.user - The user to send the email to.
- * @param {string} params.baseUrl - The base URL to use for the link.
- * @param {PrismaClient} [params.client] - The Prisma client to use.
+ * @param {object} params The options to use.
+ * @param {User} params.user The user to send the email to.
+ * @param {string} params.baseUrl The base URL to use for the link.
+ * @param {PrismaClient} [params.client] The Prisma client to use.
  * @returns {Promise<Result>} The result of the operation.
  */
 export async function sendForgotPasswordEmail({
@@ -110,9 +110,9 @@ export async function sendForgotPasswordEmail({
 
 /**
  * @summary Sends an email.
- * @param {object} params - The options to use.
- * @param {string} params.templateId - The email template ID.
- * @param {object} params.templateParams - The email template parameters.
+ * @param {object} params The options to use.
+ * @param {string} params.templateId The email template ID.
+ * @param {object} params.templateParams The email template parameters.
  * @returns {Promise<Response>} The result of the operation.
  */
 async function send({ templateId, templateParams }) {

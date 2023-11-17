@@ -10,14 +10,14 @@
   <main>
     <div class="chip">
       <div class="chip-header">
-        <h3>Reports</h3>
+        <h2>🎭 Playwright Reports</h2>
       </div>
       <div class="chip-body chip-body-no-insets">
         <% if (reports && reports.length) { %>
         <div class="test-wrapper">
           <% reports.forEach(report => { %>
           <div class="test-file-test">
-            <a href="/reports/<%= report.path %>">
+            <a href="/reports/<%= report.path %>/">
               Playwright Report <span class="report-date" data-date-in-ms="<%= report.date %>"><%= new Date(report.date).toLocaleString() %></span>
             </a>
             <span class="label <%= report.environment.toLowerCase() %>">

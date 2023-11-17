@@ -9,20 +9,20 @@
 
   <link rel="stylesheet" href="/css/playwright.css">
   <link rel="stylesheet" href="/css/main.css">
-  <% if (styles && styles.length) { %>
+  <% if (locals.styles && styles.length) { %>
   <% styles.forEach(style => { %>
   <link rel="stylesheet" href="/css/<%= style %>.css">
   <% }) %>
   <% } %>
 
   <script src="/js/nav.js" defer></script>
-  <% if (scripts && scripts.length) { %>
+  <% if (locals.scripts && scripts.length) { %>
   <% scripts.forEach(script => { %>
   <script src="/js/<%= script %>.js"></script>
   <% }) %>
   <% } %>
 
   <title>
-    <%= title ?? 'Onspring QA Reports' %>
+    <%= locals.title ?? 'Onspring QA Reports' %>
   </title>
 </head>

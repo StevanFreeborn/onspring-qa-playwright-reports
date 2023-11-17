@@ -76,7 +76,7 @@ main {
   margin-top: 1rem;
   flex-shrink: 0;
   margin-bottom: 0.5rem;
-  padding: 0 24px
+  padding: 0 24px;
 }
 
 .header-container h1 {
@@ -147,7 +147,7 @@ main {
     height: max-content;
   }
 
-  .right-header>* {
+  .right-header > * {
     flex-shrink: 0;
     width: 100%;
     text-align: right;

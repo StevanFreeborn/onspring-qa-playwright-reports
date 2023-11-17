@@ -20,12 +20,13 @@
             <a href="/reports/<%= report.path %>/">
               Playwright Report <span class="report-date" data-date-in-ms="<%= report.date %>"><%= new Date(report.date).toLocaleString() %></span>
             </a>
-            <span class="label <%= report.environment.toLowerCase() %>">
-              <%= report.environment %>
-            </span>
-            <span class="label <%= report.status %>">
-              <%= report.status %>
-            </span>
+            <div class="label-container">
+              <% Object.keys(report).forEach(key => { %>
+              <% if (report[key] && key !== 'path' && key !== 'date') { %>
+              <span class="label <%= key.toLowerCase() %> <%= report[key].toLowerCase() %>"><%= key %>: <%= report[key] %></span>
+              <% } %>
+              <% }) %>
+            </div>
           </div>
           <% }) %>
         </div>

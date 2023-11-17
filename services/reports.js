@@ -26,24 +26,17 @@ export function getReports() {
   // maybe we use database in future?
   const reportNames = fs.readdirSync('./reports');
   const reports = reportNames.map(reportName => {
-    const [
-      date,
-      environment,
-      status,
-      workflowName,
-      runNumber,
-      runAttempt,
-      prId,
-    ] = reportName.split('-');
+    const [date, environment, status, workflow, number, attempt, pr] =
+      reportName.split('-');
     return {
       date: parseInt(date),
       environment,
       status,
       path: reportName,
-      workflowName,
-      runNumber,
-      runAttempt,
-      prId,
+      workflow,
+      number,
+      attempt,
+      pr,
     };
   });
 

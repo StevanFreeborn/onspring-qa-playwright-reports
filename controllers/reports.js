@@ -78,7 +78,6 @@ async function addHeaderPartial(reportDom, req) {
 
   const headerContent = await ejs.renderFile(headerPath, {
     user: req.user,
-    csrfToken: req.session.csrfToken,
   });
   const headerDom = new JSDOM(headerContent);
   const dom = reportDom.window.document;

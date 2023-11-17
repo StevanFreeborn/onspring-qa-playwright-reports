@@ -13,20 +13,20 @@ import path from 'path';
  */
 export async function getReport(req, res, next) {
   try {
-    const reportDir = path.join(process.cwd(), 'reports', req.params.name);
-    const reportFile = path.join(reportDir, req.path);
+    const reportDirPath = path.join(process.cwd(), 'reports', req.params.name);
+    const reportFilePath = path.join(reportDirPath, req.path);
 
-    if (fs.existsSync(reportDir) === false) {
+    if (fs.existsSync(reportDirPath) === false) {
       return next();
     }
 
     if (req.path === '/') {
-      const modifiedReport = await modifyReport(reportDir);
+      const modifiedReport = await modifyReport(reportDirPath, req.user);
       return res.send(modifiedReport);
     }
 
-    if (fs.existsSync(reportFile)) {
-      return res.sendFile(req.path, { root: reportDir });
+    if (fs.existsSync(reportFilePath)) {
+      return res.sendFile(req.path, { root: reportDirPath });
     }
   } catch (error) {
     next(error);
@@ -36,15 +36,15 @@ export async function getReport(req, res, next) {
 /**
  * @summary Modifies the report view
  * @param {string} reportDir The report directory
+ * @param {object} user The user logged in
  * @returns {Promise<string>} The modified report view
  */
-async function modifyReport(reportDir) {
+async function modifyReport(reportDir, user) {
   const reportFilePath = path.join(reportDir, 'index.html');
   const reportFile = fs.readFileSync(reportFilePath, 'utf8');
   const reportDom = new JSDOM(reportFile);
-
-  const modifiedReport = await addHeadPartial(reportDom);
-
+  let modifiedReport = await addHeadPartial(reportDom);
+  modifiedReport = await addHeaderPartial(modifiedReport, user);
   return modifiedReport.serialize();
 }
 
@@ -59,5 +59,27 @@ async function addHeadPartial(reportDom) {
   const dom = reportDom.window.document;
   const head = dom.querySelector('head');
   head.prepend(new JSDOM(headContent).window.document.querySelector('head'));
+  return reportDom;
+}
+
+/**
+ * @summary Adds the header partial to the report view
+ * @param {JSDOM} reportDom The report DOM
+ * @param {object} user The user logged in
+ * @returns {Promise<JSDOM>} The report DOM with the header partial added
+ */
+async function addHeaderPartial(reportDom, user) {
+  const headerPath = path.join(
+    process.cwd(),
+    'views',
+    'partials',
+    '_header.ejs'
+  );
+  const headerContent = await ejs.renderFile(headerPath, { user });
+  const dom = reportDom.window.document;
+  const root = dom.querySelector('body');
+  root.prepend(
+    new JSDOM(headerContent).window.document.querySelector('header')
+  );
   return reportDom;
 }

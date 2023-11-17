@@ -30,8 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (response.redirected) {
-      window.location.href = response.url;
+      return (window.location.href = response.url);
     }
+
+    return alert('We were unable to log you out. Please try again.');
   }
 
   /**

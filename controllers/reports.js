@@ -21,7 +21,7 @@ export async function getReport(req, res, next) {
     }
 
     if (req.path === '/') {
-      const modifiedReport = await modifyReport(reportDirPath, req.user);
+      const modifiedReport = await modifyReport(reportDirPath, req);
       return res.send(modifiedReport);
     }
 
@@ -36,15 +36,15 @@ export async function getReport(req, res, next) {
 /**
  * @summary Modifies the report view
  * @param {string} reportDir The report directory
- * @param {object} user The user logged in
+ * @param {express.Request} req The express request object
  * @returns {Promise<string>} The modified report view
  */
-async function modifyReport(reportDir, user) {
+async function modifyReport(reportDir, req) {
   const reportFilePath = path.join(reportDir, 'index.html');
   const reportFile = fs.readFileSync(reportFilePath, 'utf8');
   const reportDom = new JSDOM(reportFile);
   let modifiedReport = await addHeadPartial(reportDom);
-  modifiedReport = await addHeaderPartial(modifiedReport, user);
+  modifiedReport = await addHeaderPartial(modifiedReport, req);
   return modifiedReport.serialize();
 }
 
@@ -65,21 +65,31 @@ async function addHeadPartial(reportDom) {
 /**
  * @summary Adds the header partial to the report view
  * @param {JSDOM} reportDom The report DOM
- * @param {object} user The user logged in
+ * @param {express.Request} req The express request object
  * @returns {Promise<JSDOM>} The report DOM with the header partial added
  */
-async function addHeaderPartial(reportDom, user) {
+async function addHeaderPartial(reportDom, req) {
   const headerPath = path.join(
     process.cwd(),
     'views',
     'partials',
     '_header.ejs'
   );
-  const headerContent = await ejs.renderFile(headerPath, { user });
+
+  const headerContent = await ejs.renderFile(headerPath, {
+    user: req.user,
+    csrfToken: req.session.csrfToken,
+  });
+  const headerDom = new JSDOM(headerContent);
   const dom = reportDom.window.document;
-  const root = dom.querySelector('body');
-  root.prepend(
-    new JSDOM(headerContent).window.document.querySelector('header')
-  );
+
+  dom
+    .querySelector('body')
+    .prepend(headerDom.window.document.querySelector('header'));
+
+  dom
+    .querySelector('meta[name="csrf-token"]')
+    .setAttribute('content', req.session.csrfToken);
+
   return reportDom;
 }

@@ -4,11 +4,12 @@
 
 import bcrypt from 'bcrypt';
 import { prismaClient } from '../data/prisma.js';
+import { logger } from '../logging/logger.js';
 import { Result } from '../utils/result.js';
 
 /**
  * @summary Registers a new user
- * @param {object} params - The options to use.
+ * @param {object} params - The params to use.
  * @param {string} params.email - The user's email address.
  * @param {string} params.password - The user's password.
  * @param {PrismaClient} [params.client] - The Prisma client to use.
@@ -46,53 +47,116 @@ export async function registerUser({ email, password, client = prismaClient }) {
   return Result.success(newUser);
 }
 
-// TODO: Repurpose to use for updating user password
-// /**
-//  * @summary Registers a new user
-//  * @param {object} params - The options to use.
-//  * @param {string} params.email - The user's email address.
-//  * @param {string} params.password - The user's password.
-//  * @param {string} params.verifyPassword - The user's verified password.
-//  * @param {PrismaClient} [params.client] - The Prisma client to use.
-//  * @returns {Promise<Result>} The result of the operation.
-//  */
-// export async function registerUser({
-//   email,
-//   password,
-//   verifyPassword,
-//   client = prismaClient,
-// }) {
-//   const user = await client.user.findUnique({
-//     where: {
-//       email,
-//     },
-//   });
+/**
+ * @summary Retrieves the user related to the provided token
+ * @param {object} params - The params to use.
+ * @param {string} params.token - The user's token.
+ * @param {PrismaClient} [params.client] - The Prisma client to use.
+ * @returns {Promise<Result>} The result of the operation.
+ */
+export async function getUserByToken({ token, client = prismaClient }) {
+  const storedToken = await client.passwordToken.findFirst({
+    where: {
+      token: token,
+    },
+    include: {
+      user: true,
+    },
+  });
 
-//   if (user !== null) {
-//     return Result.failure(new Error('User already exists'));
-//   }
+  if (storedToken === null || storedToken.expiresAt < Date.now()) {
+    return Result.failure(new Error('Invalid token'));
+  }
 
-//   if (password !== verifyPassword) {
-//     return Result.failure(new Error('Passwords do not match'));
-//   }
+  return Result.success(storedToken.user);
+}
 
-//   const passwordHash = await bcrypt.hash(password, 10);
+/**
+ * @summary Updates the user's password
+ * @param {object} params - The params to use.
+ * @param {string} params.email - The user's email address.
+ * @param {string} params.password - The user's password.
+ * @param {string} params.verifyPassword - The user's verified password.
+ * @param {string} params.token - The user's token.
+ * @param {PrismaClient} [params.client] - The Prisma client to use.
+ * @returns {Promise<Result>} The result of the operation.
+ */
+export async function updateUserPassword({
+  email,
+  password,
+  verifyPassword,
+  token,
+  client = prismaClient,
+}) {
+  if (password !== verifyPassword) {
+    return Result.failure(new Error('Passwords do not match'));
+  }
 
-//   const newUser = await client.user.create({
-//     data: {
-//       email,
-//       passwordHash,
-//       userRoles: {
-//         create: {
-//           role: {
-//             connect: {
-//               name: 'user',
-//             },
-//           },
-//         },
-//       },
-//     },
-//   });
+  const user = await client.user.findUnique({
+    where: {
+      email,
+    },
+    include: {
+      passwordToken: true,
+    },
+  });
 
-//   return Result.success(newUser);
-// }
+  if (user === null) {
+    return Result.failure(new Error('User not found'));
+  }
+
+  const userToken = user.passwordToken.find(t => t.token === token);
+
+  if (userToken === undefined || userToken.expiresAt < Date.now()) {
+    return Result.failure(new Error('Invalid token'));
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  const updatedUser = await client.user.update({
+    where: {
+      email,
+    },
+    data: {
+      passwordHash,
+    },
+  });
+
+  await client.passwordToken.delete({
+    where: {
+      id: userToken.id,
+    },
+  });
+
+  await client.session.deleteMany({
+    where: {
+      data: {
+        contains: `"passport":{"user":${updatedUser.id}}`,
+      },
+    },
+  });
+
+  return Result.success(updatedUser);
+}
+
+/**
+ * @summary Retrieves the user by email
+ * @param {object} params - The params to use.
+ * @param {string} params.email - The user's email.
+ * @param {PrismaClient} [params.client] - The Prisma client to use.
+ * @returns {Promise<Result>} The result of the operation.
+ */
+export async function getUserByEmail({ email, client = prismaClient }) {
+  const user = await client.user.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  if (user === null) {
+    logger.error(`User not found: ${email}`);
+    return Result.failure(new Error('User not found'));
+  }
+
+  return Result.success(user);
+}

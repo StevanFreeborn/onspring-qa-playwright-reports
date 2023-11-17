@@ -15,7 +15,7 @@ model User {
   email         String          @unique
   passwordHash  String
   userRoles     UserRoles[]
-  PasswordToken PasswordToken[]
+  passwordToken PasswordToken[]
 }
 
 model Session {

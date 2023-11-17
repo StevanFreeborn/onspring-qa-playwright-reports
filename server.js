@@ -82,6 +82,12 @@ app.post(
   authController.register
 );
 
+app.get('/set-password', authController.getSetPasswordView);
+app.post('/set-password', authController.setPassword);
+
+app.get('/forgot-password', authController.getForgotPasswordView);
+app.post('/forgot-password', authController.forgotPassword);
+
 app.use(
   '/reports',
   authController.ensureAuthenticated,

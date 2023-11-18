@@ -8,6 +8,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "cross-env TZ=utc nodemon -q server.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "lint:fix": "eslint --fix .",
     "format:fix": "prettier --log-level silent --write .",
     "migrate": "prisma migrate dev",
@@ -30,8 +31,9 @@
   "license": "ISC",
   "devDependencies": {
     "cross-env": "^7.0.3",
-    "eslint": "^8.53.0",
+    "eslint": "^8.54.0",
     "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-jest": "^27.6.0",
     "eslint-plugin-jsdoc": "^46.9.0",
     "eslint-plugin-prettier": "^5.0.1",
     "husky": "^8.0.3",

@@ -115,7 +115,7 @@ export async function sendForgotPasswordEmail({
  * @param {object} params.templateParams The email template parameters.
  * @returns {Promise<Response>} The result of the operation.
  */
-async function send({ templateId, templateParams }) {
+export async function send({ templateId, templateParams }) {
   return await fetch('https://api.emailjs.com/api/v1.0/email/send', {
     method: 'POST',
     body: JSON.stringify({

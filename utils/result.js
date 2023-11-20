@@ -22,34 +22,31 @@
  * @property {Error} error The error of the result
  */
 
-/**
- * @summary Creates a successful result.
- * @template T The type of the value of the result
- * @param {T} value The value of the result
- * @returns {SuccessResult<T>} A successful result
- */
-function success(value) {
-  return {
-    isFailed: false,
-    isSuccess: true,
-    value,
-  };
-}
-
-/**
- * @summary Creates a failed result.
- * @param {Error} error The error of the result
- * @returns {FailureResult} A failed result
- */
-function failure(error) {
-  return {
-    isFailed: true,
-    isSuccess: false,
-    error,
-  };
-}
-
 export const Result = {
-  success,
-  failure,
+  /**
+   * @summary Creates a successful result.
+   * @template T The type of the value of the result
+   * @param {T} value The value of the result
+   * @returns {SuccessResult<T>} A successful result
+   */
+  success(value) {
+    return {
+      isFailed: false,
+      isSuccess: true,
+      value,
+    };
+  },
+
+  /**
+   * @summary Creates a failed result.
+   * @param {Error} error The error of the result
+   * @returns {FailureResult} A failed result
+   */
+  failure(error) {
+    return {
+      isFailed: true,
+      isSuccess: false,
+      error,
+    };
+  },
 };

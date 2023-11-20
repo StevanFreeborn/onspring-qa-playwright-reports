@@ -1,4 +1,4 @@
-import { Result } from '@/utils/result.js';
+import { Result } from '../../../utils/result.js';
 
 describe('result', () => {
   test('it should contain a success function', () => {

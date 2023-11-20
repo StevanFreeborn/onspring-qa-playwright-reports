@@ -4,7 +4,7 @@ import express from 'express';
 import { check, matchedData, validationResult } from 'express-validator';
 import passport from 'passport';
 import { logger } from '../logging/logger.js';
-import * as emailService from '../services/email.js';
+import { emailService } from '../services/email.js';
 import * as usersService from '../services/users.js';
 
 /**

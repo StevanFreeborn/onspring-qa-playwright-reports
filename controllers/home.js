@@ -1,5 +1,5 @@
 import express from 'express';
-import * as reportsService from '../services/reports.js';
+import { reportsService } from '../services/reports.js';
 
 /**
  * @summary Gets the index view.

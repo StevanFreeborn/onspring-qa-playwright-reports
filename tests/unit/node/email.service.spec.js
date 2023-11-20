@@ -71,6 +71,18 @@ describe('email service', () => {
     });
   });
 
+  test('it should have a sendNewAccountEmail function', () => {
+    expect(emailService.sendNewAccountEmail).toBeDefined();
+  });
+
+  test('it should have a sendForgotPasswordEmail function', () => {
+    expect(emailService.sendForgotPasswordEmail).toBeDefined();
+  });
+
+  test('it should have a send function', () => {
+    expect(emailService.send).toBeDefined();
+  });
+
   describe('sendNewAccountEmail', () => {
     test('it should create a password token when called', async () => {
       const mockNow = 1234567890;

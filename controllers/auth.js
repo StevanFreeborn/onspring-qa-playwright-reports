@@ -5,7 +5,7 @@ import { check, matchedData, validationResult } from 'express-validator';
 import passport from 'passport';
 import { logger } from '../logging/logger.js';
 import { emailService } from '../services/email.js';
-import * as usersService from '../services/users.js';
+import { usersService } from '../services/users.js';
 
 /**
  * @summary Gets the login view.

@@ -96,20 +96,6 @@ const transports = [
 ];
 
 if (process.env.NODE_ENV === 'production') {
-  transports.push(
-    new winston.transports.File({
-      filename: 'logs/error.log',
-      level: 'error',
-      format: jsonFormat,
-    })
-  );
-  transports.push(
-    new winston.transports.File({
-      filename: 'logs/all.log',
-      format: jsonFormat,
-    })
-  );
-
   const logtail = new Logtail(process.env.LOGTAIL_SOURCE_TOKEN);
   const logtailTransport = new LogtailTransport(logtail, {
     format: jsonFormat,

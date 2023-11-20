@@ -48,11 +48,12 @@ export const emailService = {
     });
 
     if (result.status !== 200) {
+      const resultText = await result.text();
       logger.error('Failed to send email', {
         status: result.status,
-        text: await result.text(),
+        text: resultText,
       });
-      return Result.failure(new Error(await result.text()));
+      return Result.failure(new Error(resultText));
     }
 
     return Result.success(`Email sent to user: ${user.id}`);
@@ -94,11 +95,12 @@ export const emailService = {
     });
 
     if (result.status !== 200) {
+      const resultTest = await result.text();
       logger.error('Failed to send email', {
         status: result.status,
-        text: await result.text(),
+        text: resultTest,
       });
-      return Result.failure(new Error(result.text));
+      return Result.failure(new Error(resultTest));
     }
 
     return Result.success(`Email sent to user: ${user.id}`);

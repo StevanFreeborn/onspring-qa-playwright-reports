@@ -82,9 +82,9 @@ const config = {
   // ],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
-  },
+  // moduleNameMapper: {
+  //   '^@/(.*)$': '<rootDir>/$1',
+  // },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   // modulePathIgnorePatterns: [],
@@ -99,7 +99,20 @@ const config = {
   // preset: undefined,
 
   // Run tests from one or more projects
-  // projects: undefined,
+  projects: [
+    {
+      displayName: 'node',
+      testEnvironment: 'jest-environment-node',
+      testMatch: ['**/node/**/?(*.)+(spec|test).[tj]s?(x)'],
+      testPathIgnorePatterns: ['\\\\node_modules\\\\'],
+    },
+    {
+      displayName: 'browser',
+      testEnvironment: 'jest-environment-jsdom',
+      testMatch: ['**/browser/**/?(*.)+(spec|test).[tj]s?(x)'],
+      testPathIgnorePatterns: ['\\\\node_modules\\\\'],
+    },
+  ],
 
   // Use this configuration option to add custom reporters to Jest
   // reporters: undefined,
@@ -140,7 +153,7 @@ const config = {
   // snapshotSerializers: [],
 
   // The test environment that will be used for testing
-  testEnvironment: 'jest-environment-node',
+  // testEnvironment: 'jest-environment-node',
 
   // Options that will be passed to the testEnvironment
   // testEnvironmentOptions: {},
@@ -149,10 +162,10 @@ const config = {
   // testLocationInResults: false,
 
   // The glob patterns Jest uses to detect test files
-  testMatch: ['**/?(*.)+(spec|test).[tj]s?(x)'],
+  // testMatch: ['**/?(*.)+(spec|test).[tj]s?(x)'],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-  testPathIgnorePatterns: ['\\\\node_modules\\\\'],
+  // testPathIgnorePatterns: ['\\\\node_modules\\\\'],
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],
@@ -164,7 +177,7 @@ const config = {
   // testRunner: "jest-circus/runner",
 
   // A map from regular expressions to paths to transformers
-  transform: {},
+  // transform: {},
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   // transformIgnorePatterns: [

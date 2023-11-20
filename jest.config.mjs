@@ -15,7 +15,7 @@ const config = {
   // cacheDirectory: "C:\\Users\\sfree\\AppData\\Local\\Temp\\jest",
 
   // Automatically clear mock calls, instances, contexts and results before every test
-  clearMocks: true,
+  // clearMocks: true,
 
   // Indicates whether the coverage information should be collected while executing the test
   collectCoverage: true,
@@ -105,6 +105,7 @@ const config = {
       testEnvironment: 'jest-environment-node',
       testMatch: ['**/node/**/?(*.)+(spec|test).[tj]s?(x)'],
       testPathIgnorePatterns: ['\\\\node_modules\\\\'],
+      clearMocks: true,
     },
     {
       displayName: 'browser',
@@ -118,7 +119,7 @@ const config = {
   // reporters: undefined,
 
   // Automatically reset mock state before every test
-  // resetMocks: false,
+  // resetMocks: true,
 
   // Reset the module registry before running each individual test
   // resetModules: false,
@@ -127,7 +128,7 @@ const config = {
   // resolver: undefined,
 
   // Automatically restore mock state and implementation before every test
-  // restoreMocks: false,
+  // restoreMocks: true,
 
   // The root directory that Jest should scan for tests and modules within
   // rootDir: undefined,

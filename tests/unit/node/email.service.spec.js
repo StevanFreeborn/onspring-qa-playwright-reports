@@ -47,7 +47,7 @@ describe('email service', () => {
         templateId: 'template_id',
         templateParams: { param1: 'value1' },
       };
-      jest.spyOn(global, 'fetch').mockReturnValueOnce(mockResponse);
+      jest.spyOn(global, 'fetch').mockReturnValue(mockResponse);
 
       const response = await emailService.send(params);
 
@@ -77,11 +77,9 @@ describe('email service', () => {
 
       jest
         .spyOn(emailService, 'send')
-        .mockImplementationOnce(() =>
-          Promise.resolve(mockSuccessfulSendResponse)
-        );
+        .mockImplementation(() => Promise.resolve(mockSuccessfulSendResponse));
 
-      jest.spyOn(Date, 'now').mockReturnValueOnce(mockNow);
+      jest.spyOn(Date, 'now').mockReturnValue(mockNow);
 
       await emailService.sendNewAccountEmail({
         user: mockUser,
@@ -100,16 +98,15 @@ describe('email service', () => {
           },
         },
       });
+      expect(mockCreate).toHaveBeenCalledTimes(1);
     });
 
-    test('it should send an email when called using the new account template', () => {
+    test('it should send an email when called using the new account template', async () => {
       jest
         .spyOn(emailService, 'send')
-        .mockImplementationOnce(() =>
-          Promise.resolve(mockSuccessfulSendResponse)
-        );
+        .mockImplementation(() => Promise.resolve(mockSuccessfulSendResponse));
 
-      emailService.sendNewAccountEmail({
+      await emailService.sendNewAccountEmail({
         user: mockUser,
         baseUrl: mockBaseUrl,
         client: mockPrismaClient,
@@ -122,12 +119,13 @@ describe('email service', () => {
           set_password_link: `${mockBaseUrl}/set-password?token=${mockToken}`,
         },
       });
+      expect(emailService.send).toHaveBeenCalledTimes(1);
     });
 
     test('it should return an error if the email fails to send', async () => {
       jest
         .spyOn(emailService, 'send')
-        .mockImplementationOnce(() =>
+        .mockImplementation(() =>
           Promise.resolve(mockUnsuccessfulSendResponse)
         );
 
@@ -140,14 +138,14 @@ describe('email service', () => {
       expect(result.error.message).toBe('Oh no');
       expect(result.isFailed).toBe(true);
       expect(result.isSuccess).toBe(false);
+      expect(logger.error).toHaveBeenCalled();
+      expect(emailService.send).toHaveBeenCalledTimes(1);
     });
 
     test('it should return a success message if the email sends successfully', async () => {
       jest
         .spyOn(emailService, 'send')
-        .mockImplementationOnce(() =>
-          Promise.resolve(mockSuccessfulSendResponse)
-        );
+        .mockImplementation(() => Promise.resolve(mockSuccessfulSendResponse));
 
       const result = await emailService.sendNewAccountEmail({
         user: mockUser,
@@ -158,6 +156,7 @@ describe('email service', () => {
       expect(result.value).toBe(`Email sent to user: ${mockUser.id}`);
       expect(result.isFailed).toBe(false);
       expect(result.isSuccess).toBe(true);
+      expect(emailService.send).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -167,11 +166,9 @@ describe('email service', () => {
 
       jest
         .spyOn(emailService, 'send')
-        .mockImplementationOnce(() =>
-          Promise.resolve(mockSuccessfulSendResponse)
-        );
+        .mockImplementation(() => Promise.resolve(mockSuccessfulSendResponse));
 
-      jest.spyOn(Date, 'now').mockReturnValueOnce(mockNow);
+      jest.spyOn(Date, 'now').mockReturnValue(mockNow);
 
       await emailService.sendForgotPasswordEmail({
         user: mockUser,
@@ -190,16 +187,15 @@ describe('email service', () => {
           },
         },
       });
+      expect(mockCreate).toHaveBeenCalledTimes(1);
     });
 
-    test('it should send an email when called using the forgot password template', () => {
+    test('it should send an email when called using the forgot password template', async () => {
       jest
         .spyOn(emailService, 'send')
-        .mockImplementationOnce(() =>
-          Promise.resolve(mockSuccessfulSendResponse)
-        );
+        .mockImplementation(() => Promise.resolve(mockSuccessfulSendResponse));
 
-      emailService.sendForgotPasswordEmail({
+      await emailService.sendForgotPasswordEmail({
         user: mockUser,
         baseUrl: mockBaseUrl,
         client: mockPrismaClient,
@@ -212,12 +208,13 @@ describe('email service', () => {
           set_password_link: `${mockBaseUrl}/set-password?token=${mockToken}`,
         },
       });
+      expect(emailService.send).toHaveBeenCalledTimes(1);
     });
 
     test('it should return an error if the email fails to send', async () => {
       jest
         .spyOn(emailService, 'send')
-        .mockImplementationOnce(() =>
+        .mockImplementation(() =>
           Promise.resolve(mockUnsuccessfulSendResponse)
         );
 
@@ -230,14 +227,14 @@ describe('email service', () => {
       expect(result.error.message).toBe('Oh no');
       expect(result.isFailed).toBe(true);
       expect(result.isSuccess).toBe(false);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(emailService.send).toHaveBeenCalledTimes(1);
     });
 
     test('it should return a success message if the email sends successfully', async () => {
       jest
         .spyOn(emailService, 'send')
-        .mockImplementationOnce(() =>
-          Promise.resolve(mockSuccessfulSendResponse)
-        );
+        .mockImplementation(() => Promise.resolve(mockSuccessfulSendResponse));
 
       const result = await emailService.sendForgotPasswordEmail({
         user: mockUser,
@@ -248,6 +245,7 @@ describe('email service', () => {
       expect(result.value).toBe(`Email sent to user: ${mockUser.id}`);
       expect(result.isFailed).toBe(false);
       expect(result.isSuccess).toBe(true);
+      expect(emailService.send).toHaveBeenCalledTimes(1);
     });
   });
 });

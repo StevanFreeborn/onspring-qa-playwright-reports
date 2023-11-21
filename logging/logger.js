@@ -89,11 +89,7 @@ const jsonFormat = winston.format.combine(
  * @summary Defines the transports.
  * @type {Array} The transports.
  */
-const transports = [
-  new winston.transports.Console({
-    format: consoleFormat,
-  }),
-];
+const transports = [];
 
 if (process.env.NODE_ENV === 'production') {
   const logtail = new Logtail(process.env.LOGTAIL_SOURCE_TOKEN);
@@ -101,6 +97,14 @@ if (process.env.NODE_ENV === 'production') {
     format: jsonFormat,
   });
   transports.push(logtailTransport);
+}
+
+if (process.env.NODE_ENV !== 'development') {
+  transports.push(
+    new winston.transports.Console({
+      format: consoleFormat,
+    })
+  );
 }
 
 export const logger = winston.createLogger({

@@ -2,6 +2,12 @@ import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 import configureSession from 'express-session';
 import { prismaClient } from '../data/prisma.js';
 
+export const sessionStore = new PrismaSessionStore(prismaClient, {
+  checkPeriod: 2 * 60 * 1000,
+  dbRecordIdIsSessionId: true,
+  dbRecordIdFunction: undefined,
+});
+
 export const session = configureSession({
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -12,9 +18,5 @@ export const session = configureSession({
     sameSite: 'lax',
     httpOnly: true,
   },
-  store: new PrismaSessionStore(prismaClient, {
-    checkPeriod: 2 * 60 * 1000,
-    dbRecordIdIsSessionId: true,
-    dbRecordIdFunction: undefined,
-  }),
+  store: sessionStore,
 });

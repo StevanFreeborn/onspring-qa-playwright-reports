@@ -101,14 +101,14 @@ const config = {
   // Run tests from one or more projects
   projects: [
     {
-      displayName: 'node',
+      displayName: 'unit-node',
       testEnvironment: 'jest-environment-node',
       testMatch: ['**/node/**/?(*.)+(spec|test).[tj]s?(x)'],
       testPathIgnorePatterns: ['\\\\node_modules\\\\'],
       clearMocks: true,
     },
     {
-      displayName: 'browser',
+      displayName: 'unit-browser',
       testEnvironment: 'jest-environment-jsdom',
       testMatch: ['**/browser/**/?(*.)+(spec|test).[tj]s?(x)'],
       testPathIgnorePatterns: ['\\\\node_modules\\\\'],

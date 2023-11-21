@@ -101,16 +101,28 @@ const config = {
   // Run tests from one or more projects
   projects: [
     {
+      displayName: 'integration',
+      testEnvironment: 'jest-environment-node',
+      testMatch: ['**/tests/integration/**/?(*.)+(spec|test).[tj]s?(x)'],
+      testPathIgnorePatterns: ['\\\\node_modules\\\\'],
+      clearMocks: true,
+      setupFilesAfterEnv: [
+        '<rootDir>/tests/integration/db.setup.js',
+        '<rootDir>/tests/integration/session.setup.js',
+      ],
+      slowTestThreshold: 60,
+    },
+    {
       displayName: 'unit-node',
       testEnvironment: 'jest-environment-node',
-      testMatch: ['**/node/**/?(*.)+(spec|test).[tj]s?(x)'],
+      testMatch: ['**/tests/unit/node/**/?(*.)+(spec|test).[tj]s?(x)'],
       testPathIgnorePatterns: ['\\\\node_modules\\\\'],
       clearMocks: true,
     },
     {
       displayName: 'unit-browser',
       testEnvironment: 'jest-environment-jsdom',
-      testMatch: ['**/browser/**/?(*.)+(spec|test).[tj]s?(x)'],
+      testMatch: ['**/tests/unit/browser/**/?(*.)+(spec|test).[tj]s?(x)'],
       testPathIgnorePatterns: ['\\\\node_modules\\\\'],
       restoreMocks: true,
     },

@@ -8,7 +8,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "cross-env TZ=utc nodemon -q server.js",
-    "test": "jest",
+    "test": "cross-env NODE_ENV=testing jest",
+    "test:unit": "cross-env NODE_ENV=testing jest --selectProjects unit-node unit-browser",
+    "test:integration": "cross-env NODE_ENV=testing jest --selectProjects integration",
     "lint:fix": "eslint --fix .",
     "format:fix": "prettier --log-level silent --write .",
     "migrate": "prisma migrate dev",
@@ -52,6 +54,7 @@
     "@logtail/winston": "^0.4.16",
     "@prisma/client": "^5.6.0",
     "@quixo3/prisma-session-store": "^3.1.13",
+    "@testcontainers/postgresql": "^10.2.2",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.3.1",

@@ -112,6 +112,7 @@ const config = {
       testEnvironment: 'jest-environment-jsdom',
       testMatch: ['**/browser/**/?(*.)+(spec|test).[tj]s?(x)'],
       testPathIgnorePatterns: ['\\\\node_modules\\\\'],
+      restoreMocks: true,
     },
   ],
 

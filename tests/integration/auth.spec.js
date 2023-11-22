@@ -755,6 +755,7 @@ describe('GET /set-password', () => {
 describe('POST /set-password', () => {
   let csrfToken;
   let csrfCookie;
+  let createdTestUser;
 
   beforeAll(async () => {
     const response = await request(app).get('/set-password');
@@ -770,31 +771,173 @@ describe('POST /set-password', () => {
     csrfCookie = response.headers['set-cookie'].find(cookie =>
       cookie.startsWith('csrfToken')
     );
+
+    createdTestUser = await prismaClient.user.create({
+      data: {
+        email: `new.test.user+${Date.now()}@test.com`,
+        passwordHash: 'passwordHash',
+      },
+    });
   });
 
   afterEach(async () => {
     await prismaClient.passwordToken.deleteMany();
   });
 
-  test('it should return 500 error if no csrf token or cookie is in request', async () => {});
+  test('it should return 500 error if no csrf token or cookie is in request', async () => {
+    const response = await request(app)
+      .post('/set-password')
+      .type('x-www-form-urlencoded')
+      .send({
+        email: testUser.email,
+        password: '@New_password1',
+        verifyPassword: '@New_password1',
+        token: 'test_token',
+      });
 
-  test('it should return 500 error if no csrf cookie is in request', async () => {});
+    expect(response.statusCode).toBe(500);
+  });
 
-  test('it should return 500 error if no csrf token is in request body', async () => {});
+  test('it should return 500 error if no csrf cookie is in request', async () => {
+    const response = await request(app)
+      .post('/set-password')
+      .type('x-www-form-urlencoded')
+      .send({
+        email: createdTestUser.email,
+        password: '@New_password1',
+        verifyPassword: '@New_password1',
+        token: 'test_token',
+        _csrf: csrfToken,
+      });
 
-  test('it should return 400 status code if no token is provided', async () => {});
+    expect(response.statusCode).toBe(500);
+  });
 
-  test('it should return 400 status code if email is not provided', async () => {});
+  test('it should return 500 error if no csrf token is in request body', async () => {
+    const response = await request(app)
+      .post('/set-password')
+      .type('x-www-form-urlencoded')
+      .set('Cookie', [csrfCookie])
+      .send({
+        email: createdTestUser.email,
+        password: '@New_password1',
+        verifyPassword: '@New_password1',
+        token: 'test_token',
+      });
 
-  test('it should return 400 status code if password is not provided', async () => {});
+    expect(response.statusCode).toBe(500);
+  });
 
-  test('it should return 400 status code if verify password is not provided', async () => {});
+  test('it should return 400 status code if no token is provided', async () => {
+    const response = await request(app)
+      .post('/set-password')
+      .set('Cookie', [csrfCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: createdTestUser.email,
+        password: '@New_password1',
+        verifyPassword: '@New_password1',
+        _csrf: csrfToken,
+      });
 
-  test('it should return 400 status code if password and verify password do not match', async () => {});
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toContain('Token is required');
+  });
 
-  test('it should return 400 status code if email is not for same user as token', async () => {});
+  test('it should return 400 status code if email is not provided', async () => {
+    const response = await request(app)
+      .post('/set-password')
+      .set('Cookie', [csrfCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        password: '@New_password1',
+        verifyPassword: '@New_password1',
+        token: 'test_token',
+        _csrf: csrfToken,
+      });
 
-  test('it should return 400 status code if token is expired', async () => {});
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toContain('Email is required');
+  });
 
-  test('it should return 302 status code with redirect to login view if token is valid and password is updated', async () => {});
+  test('it should return 400 status code if password is not provided', async () => {
+    const response = await request(app)
+      .post('/set-password')
+      .set('Cookie', [csrfCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: createdTestUser.email,
+        verifyPassword: '@New_password1',
+        token: 'test_token',
+        _csrf: csrfToken,
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toContain('Password is required');
+  });
+
+  test('it should return 400 status code if password does not meet complexity requirements', async () => {
+    const response = await request(app)
+      .post('/set-password')
+      .set('Cookie', [csrfCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: createdTestUser.email,
+        password: 'new_password',
+        verifyPassword: 'new_password',
+        token: 'test_token',
+        _csrf: csrfToken,
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toContain('Password is required');
+  });
+
+  test('it should return 400 status code if verify password is not provided', async () => {
+    const response = await request(app)
+      .post('/set-password')
+      .set('Cookie', [csrfCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: createdTestUser.email,
+        password: '@New_password1',
+        token: 'test_token',
+        _csrf: csrfToken,
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toContain('Verify password is required');
+  });
+
+  test('it should return 400 status code if password and verify password do not match', async () => {
+    const response = await request(app)
+      .post('/set-password')
+      .set('Cookie', [csrfCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: createdTestUser.email,
+        password: '@New_password1',
+        verifyPassword: '@New_password2',
+        token: 'test_token',
+        _csrf: csrfToken,
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toContain('Passwords do not match');
+  });
+
+  test('it should return 400 status code if email is not for same user as token', async () => {
+    // TODO: Implement this test
+    expect(true).toBeFalsy();
+  });
+
+  test('it should return 400 status code if token is expired', async () => {
+    // TODO: Implement this test
+    expect(true).toBeFalsy();
+  });
+
+  test('it should return 302 status code with redirect to login view if token is valid and password is updated', async () => {
+    // TODO: Implement this test
+    expect(true).toBeFalsy();
+  });
 });

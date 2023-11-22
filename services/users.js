@@ -78,22 +78,11 @@ export const usersService = {
    * @param {object} params The params to use.
    * @param {string} params.email The user's email address.
    * @param {string} params.password The user's password.
-   * @param {string} params.verifyPassword The user's verified password.
    * @param {string} params.token The user's token.
    * @param {PrismaClient} [params.client] The Prisma client to use.
    * @returns {Promise<Result>} The result of the operation.
    */
-  async updateUserPassword({
-    email,
-    password,
-    verifyPassword,
-    token,
-    client = prismaClient,
-  }) {
-    if (password !== verifyPassword) {
-      return Result.failure(new Error('Passwords do not match'));
-    }
-
+  async updateUserPassword({ email, password, token, client = prismaClient }) {
     const user = await client.user.findUnique({
       where: {
         email,

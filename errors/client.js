@@ -13,7 +13,7 @@ export function clientErrorHandler(error, req, res, next) {
     return next(error);
   }
 
-  if (req.xhr) {
+  if (req.accepts('json')) {
     return res.status(500).send({ error: 'An unexpected error has occurred' });
   }
 

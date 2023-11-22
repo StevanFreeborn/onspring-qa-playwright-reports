@@ -104,7 +104,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 export const logger = winston.createLogger({
-  silent: process.env.NODE_ENV === 'testing',
+  silent: process.env.NODE_ENV === 'test',
   level: level(),
   levels,
   transports,

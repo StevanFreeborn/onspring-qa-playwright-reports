@@ -102,6 +102,7 @@ describe('nav', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
           },
           body: JSON.stringify({
             _csrf: 'test-csrf-token',
@@ -134,6 +135,7 @@ describe('nav', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
           },
           body: JSON.stringify({
             _csrf: 'test-csrf-token',

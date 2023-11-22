@@ -276,10 +276,23 @@ export async function setPassword(req, res, next) {
 
     const { email, password, verifyPassword, token } = matchedData(req);
 
+    if (password !== verifyPassword) {
+      errors.push('Passwords do not match');
+      return res.status(400).render('pages/setPassword', {
+        title: 'Set Password',
+        styles: ['set-password'],
+        formData: {
+          email: email,
+          password: password,
+          verifyPassword: verifyPassword,
+        },
+        errors: errors,
+      });
+    }
+
     const result = await usersService.updateUserPassword({
       email,
       password,
-      verifyPassword,
       token,
     });
 

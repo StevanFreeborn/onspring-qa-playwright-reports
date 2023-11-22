@@ -199,10 +199,10 @@ export async function register(req, res, next) {
 export async function getSetPasswordView(req, res, next) {
   const { token } = req.query;
   try {
-    const result = await usersService.getUserByToken(token);
+    const result = await usersService.getUserByToken({ token });
 
     if (result.isFailed) {
-      return res.render('pages/setPassword', {
+      return res.status(400).render('pages/setPassword', {
         title: 'Set Password',
         styles: ['set-password'],
         errors: [result.error.message],

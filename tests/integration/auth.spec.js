@@ -697,6 +697,104 @@ describe('POST /forgot-password', () => {
   });
 });
 
-describe('GET /set-password', () => {});
+describe('GET /set-password', () => {
+  afterEach(async () => {
+    await prismaClient.passwordToken.deleteMany();
+  });
 
-describe('POST /set-password', () => {});
+  test('it should return a 400 status code if no token is provided', async () => {
+    const response = await request(app).get('/set-password');
+
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toContain('Invalid token');
+  });
+
+  test('it should return a 400 status code if token is expired', async () => {
+    const passwordToken = await prismaClient.passwordToken.create({
+      data: {
+        expiresAt: Date.now() - 15 * 60 * 1000,
+        token: 'test_token',
+        user: {
+          connect: {
+            id: testUser.id,
+          },
+        },
+      },
+    });
+
+    const response = await request(app).get(
+      `/set-password?token=${passwordToken.token}`
+    );
+
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toContain('Invalid token');
+  });
+
+  test('it should return 200 status code with set password view if token is valid', async () => {
+    const passwordToken = await prismaClient.passwordToken.create({
+      data: {
+        expiresAt: Date.now() + 15 * 60 * 1000,
+        token: 'test_token',
+        user: {
+          connect: {
+            id: testUser.id,
+          },
+        },
+      },
+    });
+
+    const response = await request(app).get(
+      `/set-password?token=${passwordToken.token}`
+    );
+
+    expect(response.statusCode).toBe(200);
+    expect(response.text).toContain(testUser.email);
+  });
+});
+
+describe('POST /set-password', () => {
+  let csrfToken;
+  let csrfCookie;
+
+  beforeAll(async () => {
+    const response = await request(app).get('/set-password');
+
+    const {
+      window: { document: view },
+    } = new JSDOM(response.text);
+
+    csrfToken = view
+      .querySelector('meta[name="csrf-token"]')
+      .getAttribute('content');
+
+    csrfCookie = response.headers['set-cookie'].find(cookie =>
+      cookie.startsWith('csrfToken')
+    );
+  });
+
+  afterEach(async () => {
+    await prismaClient.passwordToken.deleteMany();
+  });
+
+  test('it should return 500 error if no csrf token or cookie is in request', async () => {});
+
+  test('it should return 500 error if no csrf cookie is in request', async () => {});
+
+  test('it should return 500 error if no csrf token is in request body', async () => {});
+
+  test('it should return 400 status code if no token is provided', async () => {});
+
+  test('it should return 400 status code if email is not provided', async () => {});
+
+  test('it should return 400 status code if password is not provided', async () => {});
+
+  test('it should return 400 status code if verify password is not provided', async () => {});
+
+  test('it should return 400 status code if password and verify password do not match', async () => {});
+
+  test('it should return 400 status code if email is not for same user as token', async () => {});
+
+  test('it should return 400 status code if token is expired', async () => {});
+
+  test('it should return 302 status code with redirect to login view if token is valid and password is updated', async () => {});
+});

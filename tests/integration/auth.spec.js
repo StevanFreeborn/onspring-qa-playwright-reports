@@ -8,6 +8,7 @@
 import { JSDOM } from 'jsdom';
 import request from 'supertest';
 import { app } from '../../app.js';
+import { prismaClient } from '../../data/prisma.js';
 import { emailService } from '../../services/email.js';
 import { testAdminUser, testUser } from './db.setup.js';
 import { logInAsUser } from './utils.js';
@@ -47,6 +48,7 @@ describe('GET /login', () => {
       .getAttribute('content');
 
     expect(csrfToken).toBeDefined();
+    expect(response.text).toContain('Login');
   });
 });
 
@@ -517,3 +519,184 @@ describe('POST /register', () => {
     expect(emailService.sendNewAccountEmail).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('GET /forgot-password', () => {
+  test('it should return a 200 status code with forgot password view', async () => {
+    const response = await request(app).get('/forgot-password');
+
+    expect(response.statusCode).toBe(200);
+    expect(response.text).toContain('Forgot Password');
+  });
+});
+
+describe('POST /forgot-password', () => {
+  let csrfToken;
+  let csrfCookie;
+
+  beforeAll(async () => {
+    const response = await request(app).get('/forgot-password');
+
+    const {
+      window: { document: view },
+    } = new JSDOM(response.text);
+
+    csrfToken = view
+      .querySelector('meta[name="csrf-token"]')
+      .getAttribute('content');
+
+    csrfCookie = response.headers['set-cookie'].find(cookie =>
+      cookie.startsWith('csrfToken')
+    );
+  });
+
+  beforeEach(async () => {
+    jest.spyOn(emailService, 'sendForgotPasswordEmail');
+  });
+
+  test('it should return 500 error if no csrf token or cookie is in request', async () => {
+    const response = await request(app)
+      .post('/forgot-password')
+      .type('x-www-form-urlencoded')
+      .send({
+        email: testUser.email,
+      });
+
+    expect(response.statusCode).toBe(500);
+    expect(emailService.sendForgotPasswordEmail).toHaveBeenCalledTimes(0);
+  });
+
+  test('it should return 500 error if no csrf cookie is in request', async () => {
+    const response = await request(app)
+      .post('/forgot-password')
+      .type('x-www-form-urlencoded')
+      .send({
+        email: testUser.email,
+        _csrf: csrfToken,
+      });
+
+    expect(response.statusCode).toBe(500);
+    expect(emailService.sendForgotPasswordEmail).toHaveBeenCalledTimes(0);
+  });
+
+  test('it should return 500 error if no csrf token is in request body', async () => {
+    const response = await request(app)
+      .post('/forgot-password')
+      .type('x-www-form-urlencoded')
+      .set('Cookie', [csrfCookie])
+      .send({
+        email: testUser.email,
+      });
+
+    expect(response.statusCode).toBe(500);
+    expect(emailService.sendForgotPasswordEmail).toHaveBeenCalledTimes(0);
+  });
+
+  test('it should return 400 status code if no email is provided', async () => {
+    const response = await request(app)
+      .post('/forgot-password')
+      .set('Cookie', [csrfCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: '',
+        _csrf: csrfToken,
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toContain('Forgot Password');
+    expect(emailService.sendForgotPasswordEmail).toHaveBeenCalledTimes(0);
+  });
+
+  test('it should return 302 status code with redirect to forgot password view with success query param', async () => {
+    const response = await request(app)
+      .post('/forgot-password')
+      .set('Cookie', [csrfCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: 'does.not.exist@test.com',
+        _csrf: csrfToken,
+      });
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe('/forgot-password?success=true');
+    expect(emailService.sendForgotPasswordEmail).toHaveBeenCalledTimes(0);
+  });
+
+  test('it should return 302 status code with redirect to forgot password view with success query param if user already has an unexpired password reset token', async () => {
+    const passwordToken = await prismaClient.passwordToken.create({
+      data: {
+        expiresAt: Date.now() + 15 * 60 * 1000,
+        token: 'test-token',
+        user: {
+          connect: {
+            id: testUser.id,
+          },
+        },
+      },
+    });
+
+    const response = await request(app)
+      .post('/forgot-password')
+      .set('Cookie', [csrfCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: testUser.email,
+        _csrf: csrfToken,
+      });
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe('/forgot-password?success=true');
+    expect(emailService.sendForgotPasswordEmail).toHaveBeenCalledTimes(0);
+
+    await prismaClient.passwordToken.delete({
+      where: {
+        id: passwordToken.id,
+      },
+    });
+  });
+
+  test('it should return 302 status code with redirect to forgot password view with success query param if email fails to send', async () => {
+    emailService.sendForgotPasswordEmail.mockImplementation(() => ({
+      isFailed: true,
+      isSuccess: false,
+      error: new Error('Failed to send email'),
+    }));
+
+    const response = await request(app)
+      .post('/forgot-password')
+      .set('Cookie', [csrfCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: testUser.email,
+        _csrf: csrfToken,
+      });
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe('/forgot-password?success=true');
+    expect(emailService.sendForgotPasswordEmail).toHaveBeenCalledTimes(1);
+  });
+
+  test('it should return 302 status code with redirect to forgot password view with success query param if email is sent successfully', async () => {
+    emailService.sendForgotPasswordEmail.mockImplementation(() => ({
+      isFailed: false,
+      isSuccess: true,
+      value: 'Email sent to user: 1',
+    }));
+
+    const response = await request(app)
+      .post('/forgot-password')
+      .set('Cookie', [csrfCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: testUser.email,
+        _csrf: csrfToken,
+      });
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe('/forgot-password?success=true');
+    expect(emailService.sendForgotPasswordEmail).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('GET /set-password', () => {});
+
+describe('POST /set-password', () => {});

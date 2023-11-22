@@ -110,7 +110,7 @@ const config = {
         '<rootDir>/tests/integration/db.setup.js',
         '<rootDir>/tests/integration/session.setup.js',
       ],
-      slowTestThreshold: 60,
+      slowTestThreshold: 10 * 60, // 10 minutes
     },
     {
       displayName: 'unit-node',
@@ -118,6 +118,7 @@ const config = {
       testMatch: ['**/tests/unit/node/**/?(*.)+(spec|test).[tj]s?(x)'],
       testPathIgnorePatterns: ['\\\\node_modules\\\\'],
       clearMocks: true,
+      slowTestThreshold: 10,
     },
     {
       displayName: 'unit-browser',
@@ -125,6 +126,7 @@ const config = {
       testMatch: ['**/tests/unit/browser/**/?(*.)+(spec|test).[tj]s?(x)'],
       testPathIgnorePatterns: ['\\\\node_modules\\\\'],
       restoreMocks: true,
+      slowTestThreshold: 10,
     },
   ],
 

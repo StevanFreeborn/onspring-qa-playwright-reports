@@ -176,4 +176,10 @@ describe('auth', () => {
       );
     });
   });
+
+  describe('POST /logout', () => {});
+
+  describe('GET /register', () => {});
+
+  describe('POST /register', () => {});
 });

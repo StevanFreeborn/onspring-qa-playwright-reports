@@ -9,6 +9,7 @@ import { JSDOM } from 'jsdom';
 import request from 'supertest';
 import { app } from '../../app.js';
 import { testAdminUser, testUser } from './db.setup.js';
+import { logInAsUser } from './utils.js';
 
 describe('GET /login', () => {
   test('it should return a 200 status code', async () => {
@@ -325,83 +326,150 @@ describe('GET /register', () => {
 });
 
 describe('POST /register', () => {
-  test('it should return a 500 error if no csrf token or cookie is in request', async () => {});
+  /** @type {AuthUser} */
+  let authTestUser;
+  /** @type {AuthUser} */
+  let authTestAdminUser;
 
-  test('it should return a 500 error if no csrf cookie is in request', async () => {});
+  beforeAll(async () => {
+    authTestUser = await logInAsUser(testUser);
+    authTestAdminUser = await logInAsUser(testAdminUser);
+  });
 
-  test('it should return a 500 error if no csrf token is in request body', async () => {});
+  test('it should return a 500 error if no csrf token or cookie is in request', async () => {
+    const response = await request(app)
+      .post('/register')
+      .set('Cookie', [authTestAdminUser.sessionCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: 'new.user@test.com',
+      });
 
-  test('it should return a 302 redirect to login view when user is not signed in', async () => {});
+    expect(response.statusCode).toBe(500);
+  });
 
-  test('it should return a 401 error when user is not signed in and request is xhr', async () => {});
+  test('it should return a 500 error if no csrf cookie is in request', async () => {
+    const response = await request(app)
+      .post('/register')
+      .set('Cookie', [authTestAdminUser.sessionCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: 'new.user@test.com',
+        _csrf: authTestAdminUser.csrfToken,
+      });
 
-  test('it should return a 403 error when user is not signed in as an admin', async () => {});
+    expect(response.statusCode).toBe(500);
+  });
 
-  test('it should return a 403 error as json when user is not signed in as an admin and request is xhr', async () => {});
+  test('it should return a 500 error if no csrf token is in request body', async () => {
+    const response = await request(app)
+      .post('/register')
+      .set('Cookie', [
+        authTestAdminUser.sessionCookie,
+        authTestAdminUser.csrfCookie,
+      ])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: 'new.user@test.com',
+      });
 
-  test('it should return a 400 error if no email is provided', async () => {});
+    expect(response.statusCode).toBe(500);
+  });
 
-  test('it should return a 400 error if user already exists as admin', async () => {});
+  test('it should return a 302 redirect to login view when user is not signed in with redirect query param', async () => {
+    const registerPath = '/register';
+    const response = await request(app)
+      .post(registerPath)
+      .set('Cookie', [authTestAdminUser.csrfCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: 'new.user@test.com',
+        _csrf: authTestAdminUser.csrfToken,
+      });
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe(
+      `/login?redirect=${encodeURIComponent(registerPath)}`
+    );
+  });
+
+  test('it should return a 401 error when user is not signed in and request is xhr', async () => {
+    const response = await request(app)
+      .post('/register')
+      .set('Cookie', [authTestAdminUser.csrfCookie])
+      .set('X-Requested-With', 'XMLHttpRequest')
+      .type('x-www-form-urlencoded')
+      .send({
+        email: 'new.user@test.com',
+        _csrf: authTestAdminUser.csrfToken,
+      });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body).toEqual({ error: 'Unauthorized' });
+  });
+
+  test('it should return a 403 error when user is not signed in as an admin', async () => {
+    const response = await request(app)
+      .post('/register')
+      .set('Cookie', [authTestUser.csrfCookie, authTestUser.sessionCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: 'new.user@test.com',
+        _csrf: authTestUser.csrfToken,
+      });
+
+    expect(response.statusCode).toBe(403);
+    expect(response.text).toContain('Forbidden');
+  });
+
+  test('it should return a 403 error as json when user is not signed in as an admin and request is xhr', async () => {
+    const response = await request(app)
+      .post('/register')
+      .set('Cookie', [authTestUser.csrfCookie, authTestUser.sessionCookie])
+      .set('X-Requested-With', 'XMLHttpRequest')
+      .type('x-www-form-urlencoded')
+      .send({
+        email: 'new.user@test.com',
+        _csrf: authTestUser.csrfToken,
+      });
+
+    expect(response.statusCode).toBe(403);
+    expect(response.body).toEqual({ error: 'Forbidden' });
+  });
+
+  test('it should return a 400 error if no email is provided', async () => {
+    const response = await request(app)
+      .post('/register')
+      .set('Cookie', [
+        authTestAdminUser.csrfCookie,
+        authTestAdminUser.sessionCookie,
+      ])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: '',
+        _csrf: authTestAdminUser.csrfToken,
+      });
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  test('it should return a 400 error if user already exists with given email', async () => {
+    const response = await request(app)
+      .post('/register')
+      .set('Cookie', [
+        authTestAdminUser.csrfCookie,
+        authTestAdminUser.sessionCookie,
+      ])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: testUser.email,
+        _csrf: authTestAdminUser.csrfToken,
+      });
+
+    expect(response.statusCode).toBe(400);
+  });
 
   test('it should return a 500 error if new account email fails to send', async () => {});
 
   test('it should return a 302 redirect to register view with a success query param', async () => {});
 });
-
-/**
- * @summary Logs in as a user and returns the artifacts needed to make authenticated requests
- * @param {object} user The user to log in as
- * @param {string} user.email The user's email
- * @param {string} user.password The user's password
- * @returns {Promise<AuthUser>} A promise that resolves with the artifacts needed to make authenticated requests
- */
-async function logInAsUser(user) {
-  const response = await request(app).get('/login');
-
-  const {
-    window: { document: loginView },
-  } = new JSDOM(response.text);
-
-  const csrfToken = loginView
-    .querySelector('meta[name="csrf-token"]')
-    .getAttribute('content');
-
-  const cookies = response.headers['set-cookie'];
-
-  const loginResponse = await request(app)
-    .post('/login')
-    .set('Cookie', cookies)
-    .type('x-www-form-urlencoded')
-    .send({
-      email: user.email,
-      password: user.password,
-      _csrf: csrfToken,
-    });
-
-  const loginResponseCookies = loginResponse.headers['set-cookie'];
-  const authSessionCookie = loginResponseCookies.find(cookie =>
-    cookie.includes('connect.sid')
-  );
-
-  const indexResponse = await request(app)
-    .get('/')
-    .set('Cookie', loginResponseCookies);
-
-  const {
-    window: { document: indexView },
-  } = new JSDOM(indexResponse.text);
-
-  const indexResponseCookies = indexResponse.headers['set-cookie'];
-  const authCsrfCookie = indexResponseCookies.find(cookie =>
-    cookie.includes('csrfToken')
-  );
-  const authSessionCsrfToken = indexView
-    .querySelector('meta[name="csrf-token"]')
-    .getAttribute('content');
-
-  return {
-    csrfCookie: authCsrfCookie,
-    sessionCookie: authSessionCookie,
-    csrfToken: authSessionCsrfToken,
-  };
-}

@@ -8,6 +8,7 @@
 import { JSDOM } from 'jsdom';
 import request from 'supertest';
 import { app } from '../../app.js';
+import { emailService } from '../../services/email.js';
 import { testAdminUser, testUser } from './db.setup.js';
 import { logInAsUser } from './utils.js';
 
@@ -469,7 +470,50 @@ describe('POST /register', () => {
     expect(response.statusCode).toBe(400);
   });
 
-  test('it should return a 500 error if new account email fails to send', async () => {});
+  test('it should return a 500 error if new account email fails to send', async () => {
+    jest.spyOn(emailService, 'sendNewAccountEmail').mockImplementation(() => ({
+      isFailed: true,
+      isSuccess: false,
+      error: new Error('Failed to send email'),
+    }));
 
-  test('it should return a 302 redirect to register view with a success query param', async () => {});
+    const response = await request(app)
+      .post('/register')
+      .set('Cookie', [
+        authTestAdminUser.csrfCookie,
+        authTestAdminUser.sessionCookie,
+      ])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: `new.user+${Date.now()}@test.com`,
+        _csrf: authTestAdminUser.csrfToken,
+      });
+
+    expect(response.statusCode).toBe(500);
+    expect(emailService.sendNewAccountEmail).toHaveBeenCalledTimes(1);
+  });
+
+  test('it should return a 302 redirect to register view with a success query param', async () => {
+    jest.spyOn(emailService, 'sendNewAccountEmail').mockImplementation(() => ({
+      isFailed: false,
+      isSuccess: true,
+      value: 'Email sent to user: 1',
+    }));
+
+    const response = await request(app)
+      .post('/register')
+      .set('Cookie', [
+        authTestAdminUser.csrfCookie,
+        authTestAdminUser.sessionCookie,
+      ])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: `new.user+${Date.now()}@test.com`,
+        _csrf: authTestAdminUser.csrfToken,
+      });
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe('/register?success=true');
+    expect(emailService.sendNewAccountEmail).toHaveBeenCalledTimes(1);
+  });
 });

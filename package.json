@@ -8,9 +8,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "cross-env TZ=utc nodemon -q server.js",
-    "test": "cross-env NODE_ENV=testing jest",
-    "test:unit": "cross-env NODE_ENV=testing jest --selectProjects unit-node unit-browser",
-    "test:integration": "cross-env NODE_ENV=testing jest --selectProjects integration",
+    "test": "cross-env NODE_ENV=test jest",
+    "test:unit": "cross-env NODE_ENV=test jest --selectProjects unit-node unit-browser",
+    "test:integration": "cross-env NODE_ENV=test jest --selectProjects integration",
     "lint:fix": "eslint --fix .",
     "format:fix": "prettier --log-level silent --write .",
     "migrate": "prisma migrate dev",
@@ -47,14 +47,14 @@
     "nodemon": "^3.0.1",
     "prettier": "^3.1.0",
     "prisma": "^5.6.0",
-    "supertest": "^6.3.3"
+    "supertest": "^6.3.3",
+    "@testcontainers/postgresql": "^10.2.2"
   },
   "dependencies": {
     "@logtail/node": "^0.4.16",
     "@logtail/winston": "^0.4.16",
     "@prisma/client": "^5.6.0",
     "@quixo3/prisma-session-store": "^3.1.13",
-    "@testcontainers/postgresql": "^10.2.2",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.3.1",

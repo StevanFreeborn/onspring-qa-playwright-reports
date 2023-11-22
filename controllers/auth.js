@@ -391,7 +391,7 @@ export function ensureAuthenticated(req, res, next) {
     return next();
   }
 
-  if (req.accepts('json')) {
+  if (req.xhr) {
     return res.status(401).send({ error: 'Unauthorized' });
   }
 
@@ -414,7 +414,7 @@ export function ensureAuthorized(role) {
       return next();
     }
 
-    if (req.accepts('json')) {
+    if (req.xhr) {
       return res.status(403).send({ error: 'Forbidden' });
     }
 

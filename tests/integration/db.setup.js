@@ -1,10 +1,7 @@
-import { PrismaClient } from '@prisma/client';
-import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import bcrypt from 'bcrypt';
 import { execSync } from 'child_process';
+import { prismaClient } from '../../data/prisma.js';
 
-let testContainer;
-let client;
 const timeout = 60000 * 10;
 
 const testPassword = 'password';
@@ -21,33 +18,16 @@ export const testUser = {
 };
 
 beforeAll(async () => {
-  testContainer = await new PostgreSqlContainer().start();
-  const connectionString = testContainer.getConnectionUri();
-
-  process.env.DATABASE_URL = connectionString;
-
-  // want to instantiate a new client here so that we can use the
-  // DATABASE_URL environment variable that we have just overwritten
-  // with the test container connection string
-  client = new PrismaClient();
-
   execSync(
-    `cross-env DATABASE_URL=${process.env.DATABASE_URL} prisma migrate dev`
+    `cross-env DATABASE_URL=${process.env.TEST_DATABASE_URL} prisma migrate dev`
   );
-}, timeout);
-
-beforeEach(async () => {
-  await seedTestData(client);
-}, timeout);
-
-afterEach(async () => {
-  execSync(
-    `cross-env DATABASE_URL=${process.env.DATABASE_URL} prisma migrate reset --force`
-  );
+  await seedTestData();
 }, timeout);
 
 afterAll(async () => {
-  await testContainer.stop();
+  execSync(
+    `cross-env DATABASE_URL=${process.env.TEST_DATABASE_URL} prisma migrate reset --force`
+  );
 }, timeout);
 
 /**
@@ -55,7 +35,7 @@ afterAll(async () => {
  * @returns {Promise<void>} A promise that resolves when the operation is complete
  */
 async function seedTestData() {
-  await client.role.createMany({
+  await prismaClient.role.createMany({
     data: [
       {
         name: 'admin',
@@ -67,7 +47,7 @@ async function seedTestData() {
     skipDuplicates: true,
   });
 
-  await client.user.create({
+  await prismaClient.user.create({
     data: {
       email: testAdminUser.email,
       passwordHash: hashedTestPassword,
@@ -92,7 +72,7 @@ async function seedTestData() {
     },
   });
 
-  await client.user.create({
+  await prismaClient.user.create({
     data: {
       email: testUser.email,
       passwordHash: hashedTestPassword,

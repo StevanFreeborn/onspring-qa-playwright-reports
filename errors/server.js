@@ -25,7 +25,7 @@ export function errorHandler(error, req, res, next) {
  * @returns {void}
  */
 export function notFoundHandler(req, res) {
-  if (req.accepts('json')) {
+  if (req.xhr) {
     return res.status(404).send({ error: 'Not found' });
   }
 

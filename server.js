@@ -96,7 +96,12 @@ app.use(
   reportsController.getReport
 );
 
-app.use('/reports', homeController.getIndexView);
+app.use(
+  '/reports',
+  authController.ensureAuthenticated,
+  authController.ensureAuthorized('user'),
+  homeController.getIndexView
+);
 
 app.use(logErrors);
 app.use(clientErrorHandler);

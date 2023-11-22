@@ -47,7 +47,7 @@ async function seedTestData() {
     skipDuplicates: true,
   });
 
-  await prismaClient.user.create({
+  const createdTestAdminUser = await prismaClient.user.create({
     data: {
       email: testAdminUser.email,
       passwordHash: hashedTestPassword,
@@ -72,7 +72,7 @@ async function seedTestData() {
     },
   });
 
-  await prismaClient.user.create({
+  const createdTestUser = await prismaClient.user.create({
     data: {
       email: testUser.email,
       passwordHash: hashedTestPassword,
@@ -87,4 +87,7 @@ async function seedTestData() {
       },
     },
   });
+
+  testUser.id = createdTestUser.id;
+  testAdminUser.id = createdTestAdminUser.id;
 }

@@ -354,7 +354,7 @@ export async function forgotPassword(req, res, next) {
     const { email } = matchedData(req);
 
     const userResult = await usersService.getUserByEmail({ email });
-    const hasPasswordToken = userResult.value.passwordTokens?.length > 0;
+    const hasPasswordToken = userResult.value?.passwordTokens?.length > 0;
 
     if (userResult.isSuccess && hasPasswordToken === false) {
       await emailService.sendForgotPasswordEmail({

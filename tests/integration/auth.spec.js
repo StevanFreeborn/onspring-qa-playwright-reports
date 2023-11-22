@@ -298,7 +298,39 @@ describe('auth', () => {
     });
   });
 
-  describe('GET /register', () => {});
+  describe('GET /register', () => {
+    test('it should return a 302 redirect to login view when user is not signed in', async () => {});
 
-  describe('POST /register', () => {});
+    test('it should return a 401 error when user is not signed in and accepts json', async () => {});
+
+    test('it should return a 403 error when user is not signed in as an admin', async () => {});
+
+    test('it should return a 403 error as json when user is not signed in as an admin and accepts json', async () => {});
+
+    test('it should return a 200 status code and a register view when user is signed in as an admin', async () => {});
+  });
+
+  describe('POST /register', () => {
+    test('it should return a 500 error if no csrf token or cookie is in request', async () => {});
+
+    test('it should return a 500 error if no csrf cookie is in request', async () => {});
+
+    test('it should return a 500 error if no csrf token is in request body', async () => {});
+
+    test('it should return a 302 redirect to login view when user is not signed in', async () => {});
+
+    test('it should return a 401 error when user is not signed in and accepts json', async () => {});
+
+    test('it should return a 403 error when user is not signed in as an admin', async () => {});
+
+    test('it should return a 403 error as json when user is not signed in as an admin and accepts json', async () => {});
+
+    test('it should return a 400 error if no email is provided', async () => {});
+
+    test('it should return a 400 error if user already exists as admin', async () => {});
+
+    test('it should return a 500 error if new account email fails to send', async () => {});
+
+    test('it should return a 302 redirect to register view with a success query param', async () => {});
+  });
 });

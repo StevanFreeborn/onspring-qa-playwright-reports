@@ -194,27 +194,12 @@ describe('usersService', () => {
   });
 
   describe('updateUserPassword', () => {
-    test('it should return an error if passwords do not match', async () => {
-      const result = await usersService.updateUserPassword({
-        email: 'email',
-        password: 'password',
-        verifyPassword: 'verifyPassword',
-        token: 'token',
-        client: mockPrismaClient,
-      });
-
-      expect(result.isFailed).toBe(true);
-      expect(result.isSuccess).toBe(false);
-      expect(result.error.message).toBe('Passwords do not match');
-    });
-
     test('it should return an error if user with given email is not found', async () => {
       mockPrismaClient.user.findUnique.mockReturnValue(null);
 
       const result = await usersService.updateUserPassword({
         email: 'email',
         password: 'password',
-        verifyPassword: 'password',
         token: 'token',
         client: mockPrismaClient,
       });
@@ -241,7 +226,6 @@ describe('usersService', () => {
       const result = await usersService.updateUserPassword({
         email: 'email',
         password: 'password',
-        verifyPassword: 'password',
         token: 'token',
         client: mockPrismaClient,
       });
@@ -268,7 +252,6 @@ describe('usersService', () => {
       const result = await usersService.updateUserPassword({
         email: 'email',
         password: 'password',
-        verifyPassword: 'password',
         token: 'token',
         client: mockPrismaClient,
       });
@@ -303,7 +286,6 @@ describe('usersService', () => {
       const result = await usersService.updateUserPassword({
         email: 'email',
         password: 'password',
-        verifyPassword: 'password',
         token: 'token',
         client: mockPrismaClient,
       });

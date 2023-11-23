@@ -927,17 +927,89 @@ describe('POST /set-password', () => {
   });
 
   test('it should return 400 status code if email is not for same user as token', async () => {
-    // TODO: Implement this test
-    expect(true).toBeFalsy();
+    const passwordToken = await prismaClient.passwordToken.create({
+      data: {
+        expiresAt: Date.now() + 15 * 60 * 1000,
+        token: 'test_token',
+        user: {
+          connect: {
+            id: testUser.id,
+          },
+        },
+      },
+    });
+
+    const response = await request(app)
+      .post('/set-password')
+      .set('Cookie', [csrfCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: createdTestUser.email,
+        password: '@New_password1',
+        verifyPassword: '@New_password1',
+        token: passwordToken.token,
+        _csrf: csrfToken,
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toContain('Unable to set password');
   });
 
   test('it should return 400 status code if token is expired', async () => {
-    // TODO: Implement this test
-    expect(true).toBeFalsy();
+    const passwordToken = await prismaClient.passwordToken.create({
+      data: {
+        expiresAt: Date.now() - 15 * 60 * 1000,
+        token: 'test_token',
+        user: {
+          connect: {
+            id: createdTestUser.id,
+          },
+        },
+      },
+    });
+
+    const response = await request(app)
+      .post('/set-password')
+      .set('Cookie', [csrfCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: createdTestUser.email,
+        password: '@New_password1',
+        verifyPassword: '@New_password1',
+        token: passwordToken.token,
+        _csrf: csrfToken,
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toContain('Unable to set password');
   });
 
   test('it should return 302 status code with redirect to login view if token is valid and password is updated', async () => {
-    // TODO: Implement this test
-    expect(true).toBeFalsy();
+    const passwordToken = await prismaClient.passwordToken.create({
+      data: {
+        expiresAt: Date.now() + 15 * 60 * 1000,
+        token: 'test_token',
+        user: {
+          connect: {
+            id: createdTestUser.id,
+          },
+        },
+      },
+    });
+
+    const response = await request(app)
+      .post('/set-password')
+      .set('Cookie', [csrfCookie])
+      .type('x-www-form-urlencoded')
+      .send({
+        email: createdTestUser.email,
+        password: '@New_password1',
+        verifyPassword: '@New_password1',
+        token: passwordToken.token,
+        _csrf: csrfToken,
+      });
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe('/login');
   });
 });

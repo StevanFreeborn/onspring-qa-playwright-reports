@@ -1,34 +1,32 @@
+import { Prisma } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { execSync } from 'child_process';
 import { prismaClient } from '../../data/prisma.js';
 
 const timeout = 60000 * 10;
 
-const testPassword = 'password';
-const hashedTestPassword = bcrypt.hashSync(testPassword, 10);
+beforeAll(async () => {
+  execSync(
+    `cross-env DATABASE_URL=${process.env.TEST_DATABASE_URL} prisma migrate deploy`
+  );
+  await cleanDatabase();
+  await seedTestData();
+}, timeout);
+
+export const testPassword = 'password';
+export const hashedTestPassword = bcrypt.hashSync(testPassword, 10);
 
 export const testAdminUser = {
-  email: 'admin@test.com',
+  id: 0,
+  email: `admin+${Date.now()}@test.com`,
   password: testPassword,
 };
 
 export const testUser = {
-  email: 'user@test.com',
+  id: 0,
+  email: `user+${Date.now()}@test.com`,
   password: testPassword,
 };
-
-beforeAll(async () => {
-  execSync(
-    `cross-env DATABASE_URL=${process.env.TEST_DATABASE_URL} prisma migrate dev`
-  );
-  await seedTestData();
-}, timeout);
-
-afterAll(async () => {
-  execSync(
-    `cross-env DATABASE_URL=${process.env.TEST_DATABASE_URL} prisma migrate reset --force`
-  );
-}, timeout);
 
 /**
  * @summary Seeds the test database with test data
@@ -90,4 +88,16 @@ async function seedTestData() {
 
   testUser.id = createdTestUser.id;
   testAdminUser.id = createdTestAdminUser.id;
+}
+
+/**
+ * @summary Cleans up test data
+ * @returns {Promise<void>} A promise that resolves when the operation is complete
+ */
+async function cleanDatabase() {
+  const tables = Object.values(Prisma.ModelName);
+
+  for (const table of tables) {
+    await prismaClient.$queryRawUnsafe(`TRUNCATE "${table}" CASCADE;`);
+  }
 }

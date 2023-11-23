@@ -1,4 +1,4 @@
-const { sessionStore } = require('../../auth/session.js');
+import { sessionStore } from '../../auth/session.js';
 
 afterAll(async () => {
   await sessionStore.shutdown();

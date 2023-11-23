@@ -16,3 +16,13 @@ export function getIndexView(req, res) {
     reports: reports,
   });
 }
+
+/**
+ * @summary Checks the status of the app.
+ * @param {express.Request} req The request object
+ * @param {express.Response} res The response object
+ * @returns {void}
+ */
+export function checkStatus(req, res) {
+  return res.json({ message: 'pong' });
+}

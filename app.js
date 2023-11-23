@@ -54,9 +54,7 @@ app.use((req, res, next) => {
 
 app.use(express.static(path.join(process.cwd(), 'public')));
 
-app.get('/api/ping', (req, res) => {
-  res.json({ message: 'pong' });
-});
+app.get('/api/ping', homeController.checkStatus);
 
 app.get('/login', authController.ensureAnonymous, authController.getLoginView);
 app.post('/login', authController.ensureAnonymous, authController.login);

@@ -187,92 +187,13 @@ describe('POST /login', () => {
   });
 });
 
-describe('POST /logout', () => {
-  /** @type {AuthUser} */
-  let authTestUser;
-
-  beforeAll(async () => {
-    authTestUser = await logInAsUser(testUser);
-  });
-
-  test('it should return a 500 error if no csrf token or cookie is in request', async () => {
-    const response = await request(app)
-      .post('/logout')
-      .type('application/json')
-      .set('X-Requested-With', 'XMLHttpRequest')
-      .send({});
-
-    expect(response.statusCode).toBe(500);
-    expect(response.body).toEqual({
-      error: 'An unexpected error has occurred',
-    });
-  });
-
-  test('it should return a 500 error if no csrf cookie is in quest', async () => {
-    const response = await request(app)
-      .post('/logout')
-      .type('application/json')
-      .set('Cookie', [authTestUser.sessionCookie])
-      .set('X-Requested-With', 'XMLHttpRequest')
-      .send({
-        _csrf: authTestUser.csrfToken,
-      });
-
-    expect(response.statusCode).toBe(500);
-    expect(response.body).toEqual({
-      error: 'An unexpected error has occurred',
-    });
-  });
-
-  test('it should return a 500 error if no csrf token is in request body', async () => {
-    const response = await request(app)
-      .post('/logout')
-      .type('application/json')
-      .set('Cookie', [authTestUser.csrfCookie, authTestUser.sessionCookie])
-      .set('X-Requested-With', 'XMLHttpRequest')
-      .send({});
-
-    expect(response.statusCode).toBe(500);
-    expect(response.body).toEqual({
-      error: 'An unexpected error has occurred',
-    });
-  });
-
-  test('it should return a 302 redirect to login view when user is signed in', async () => {
-    const response = await request(app)
-      .post('/logout')
-      .type('application/json')
-      .set('Cookie', [authTestUser.csrfCookie, authTestUser.sessionCookie])
-      .send({
-        _csrf: authTestUser.csrfToken,
-      });
-
-    expect(response.statusCode).toBe(302);
-    expect(response.headers.location).toBe('/login');
-  });
-
-  test('it should return a 401 error when user is not signed in', async () => {
-    const response = await request(app)
-      .post('/logout')
-      .type('application/json')
-      .set('Cookie', [authTestUser.csrfCookie])
-      .set('X-Requested-With', 'XMLHttpRequest')
-      .send({
-        _csrf: authTestUser.csrfToken,
-      });
-
-    expect(response.statusCode).toBe(401);
-    expect(response.body).toEqual({ error: 'Unauthorized' });
-  });
-});
-
 describe('GET /register', () => {
   /** @type {AuthUser} */
   let authTestUser;
   /** @type {AuthUser} */
   let authTestAdminUser;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     authTestUser = await logInAsUser(testUser);
     authTestAdminUser = await logInAsUser(testAdminUser);
   });
@@ -334,7 +255,7 @@ describe('POST /register', () => {
   /** @type {AuthUser} */
   let authTestAdminUser;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     authTestUser = await logInAsUser(testUser);
     authTestAdminUser = await logInAsUser(testAdminUser);
   });
@@ -698,10 +619,6 @@ describe('POST /forgot-password', () => {
 });
 
 describe('GET /set-password', () => {
-  afterEach(async () => {
-    await prismaClient.passwordToken.deleteMany();
-  });
-
   test('it should return a 400 status code if no token is provided', async () => {
     const response = await request(app).get('/set-password');
 
@@ -713,7 +630,7 @@ describe('GET /set-password', () => {
     const passwordToken = await prismaClient.passwordToken.create({
       data: {
         expiresAt: Date.now() - 15 * 60 * 1000,
-        token: 'test_token',
+        token: `test_token_${Date.now()}`,
         user: {
           connect: {
             id: testUser.id,
@@ -734,7 +651,7 @@ describe('GET /set-password', () => {
     const passwordToken = await prismaClient.passwordToken.create({
       data: {
         expiresAt: Date.now() + 15 * 60 * 1000,
-        token: 'test_token',
+        token: `test_token_${Date.now()}`,
         user: {
           connect: {
             id: testUser.id,
@@ -778,10 +695,6 @@ describe('POST /set-password', () => {
         passwordHash: 'passwordHash',
       },
     });
-  });
-
-  afterEach(async () => {
-    await prismaClient.passwordToken.deleteMany();
   });
 
   test('it should return 500 error if no csrf token or cookie is in request', async () => {
@@ -852,7 +765,7 @@ describe('POST /set-password', () => {
       .send({
         password: '@New_password1',
         verifyPassword: '@New_password1',
-        token: 'test_token',
+        token: `test_token_${Date.now()}`,
         _csrf: csrfToken,
       });
 
@@ -868,7 +781,7 @@ describe('POST /set-password', () => {
       .send({
         email: createdTestUser.email,
         verifyPassword: '@New_password1',
-        token: 'test_token',
+        token: `test_token_${Date.now()}`,
         _csrf: csrfToken,
       });
 
@@ -885,7 +798,7 @@ describe('POST /set-password', () => {
         email: createdTestUser.email,
         password: 'new_password',
         verifyPassword: 'new_password',
-        token: 'test_token',
+        token: `test_token_${Date.now()}`,
         _csrf: csrfToken,
       });
 
@@ -901,7 +814,7 @@ describe('POST /set-password', () => {
       .send({
         email: createdTestUser.email,
         password: '@New_password1',
-        token: 'test_token',
+        token: `test_token_${Date.now()}`,
         _csrf: csrfToken,
       });
 
@@ -930,7 +843,7 @@ describe('POST /set-password', () => {
     const passwordToken = await prismaClient.passwordToken.create({
       data: {
         expiresAt: Date.now() + 15 * 60 * 1000,
-        token: 'test_token',
+        token: `test_token_${Date.now()}`,
         user: {
           connect: {
             id: testUser.id,
@@ -959,7 +872,7 @@ describe('POST /set-password', () => {
     const passwordToken = await prismaClient.passwordToken.create({
       data: {
         expiresAt: Date.now() - 15 * 60 * 1000,
-        token: 'test_token',
+        token: `test_token_${Date.now()}`,
         user: {
           connect: {
             id: createdTestUser.id,
@@ -988,7 +901,7 @@ describe('POST /set-password', () => {
     const passwordToken = await prismaClient.passwordToken.create({
       data: {
         expiresAt: Date.now() + 15 * 60 * 1000,
-        token: 'test_token',
+        token: `test_token_${Date.now()}`,
         user: {
           connect: {
             id: createdTestUser.id,
@@ -1011,5 +924,84 @@ describe('POST /set-password', () => {
 
     expect(response.statusCode).toBe(302);
     expect(response.headers.location).toBe('/login');
+  });
+});
+
+describe('POST /logout', () => {
+  /** @type {AuthUser} */
+  let authTestUser;
+
+  beforeEach(async () => {
+    authTestUser = await logInAsUser(testUser);
+  });
+
+  test('it should return a 500 error if no csrf token or cookie is in request', async () => {
+    const response = await request(app)
+      .post('/logout')
+      .type('application/json')
+      .set('X-Requested-With', 'XMLHttpRequest')
+      .send({});
+
+    expect(response.statusCode).toBe(500);
+    expect(response.body).toEqual({
+      error: 'An unexpected error has occurred',
+    });
+  });
+
+  test('it should return a 500 error if no csrf cookie is in request', async () => {
+    const response = await request(app)
+      .post('/logout')
+      .type('application/json')
+      .set('Cookie', [authTestUser.sessionCookie])
+      .set('X-Requested-With', 'XMLHttpRequest')
+      .send({
+        _csrf: authTestUser.csrfToken,
+      });
+
+    expect(response.statusCode).toBe(500);
+    expect(response.body).toEqual({
+      error: 'An unexpected error has occurred',
+    });
+  });
+
+  test('it should return a 500 error if no csrf token is in request body', async () => {
+    const response = await request(app)
+      .post('/logout')
+      .type('application/json')
+      .set('Cookie', [authTestUser.csrfCookie, authTestUser.sessionCookie])
+      .set('X-Requested-With', 'XMLHttpRequest')
+      .send({});
+
+    expect(response.statusCode).toBe(500);
+    expect(response.body).toEqual({
+      error: 'An unexpected error has occurred',
+    });
+  });
+
+  test('it should return a 302 redirect to login view when user is signed in', async () => {
+    const response = await request(app)
+      .post('/logout')
+      .type('application/json')
+      .set('Cookie', [authTestUser.csrfCookie, authTestUser.sessionCookie])
+      .send({
+        _csrf: authTestUser.csrfToken,
+      });
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe('/login');
+  });
+
+  test('it should return a 401 error when user is not signed in', async () => {
+    const response = await request(app)
+      .post('/logout')
+      .type('application/json')
+      .set('Cookie', [authTestUser.csrfCookie])
+      .set('X-Requested-With', 'XMLHttpRequest')
+      .send({
+        _csrf: authTestUser.csrfToken,
+      });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body).toEqual({ error: 'Unauthorized' });
   });
 });

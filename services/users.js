@@ -3,7 +3,6 @@
  */
 
 import bcrypt from 'bcrypt';
-import { prismaClient } from '../data/prisma.js';
 import { logger } from '../logging/logger.js';
 import { Result } from '../utils/result.js';
 
@@ -16,11 +15,11 @@ export const usersService = {
    * @param {object} params The params to use.
    * @param {string} params.email The user's email address.
    * @param {string} params.password The user's password.
-   * @param {PrismaClient} [params.client] The Prisma client to use.
+   * @param {PrismaClient} [params.context] The Prisma client to use.
    * @returns {Promise<Result>} The result of the operation.
    */
-  async registerUser({ email, password, client = prismaClient }) {
-    const user = await client.user.findUnique({
+  async registerUser({ email, password, context }) {
+    const user = await context.user.findUnique({
       where: {
         email,
       },
@@ -32,7 +31,7 @@ export const usersService = {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const newUser = await client.user.create({
+    const newUser = await context.user.create({
       data: {
         email,
         passwordHash,
@@ -54,11 +53,11 @@ export const usersService = {
    * @summary Retrieves the user related to the provided token
    * @param {object} params The params to use.
    * @param {string} params.token The user's token.
-   * @param {PrismaClient} [params.client] The Prisma client to use.
+   * @param {PrismaClient} params.context The Prisma client to use.
    * @returns {Promise<Result>} The result of the operation.
    */
-  async getUserByToken({ token, client = prismaClient }) {
-    const storedToken = await client.passwordToken.findFirst({
+  async getUserByToken({ token, context }) {
+    const storedToken = await context.passwordToken.findFirst({
       where: {
         token: token,
       },
@@ -79,11 +78,11 @@ export const usersService = {
    * @param {string} params.email The user's email address.
    * @param {string} params.password The user's password.
    * @param {string} params.token The user's token.
-   * @param {PrismaClient} [params.client] The Prisma client to use.
+   * @param {PrismaClient} params.context The Prisma client to use.
    * @returns {Promise<Result>} The result of the operation.
    */
-  async updateUserPassword({ email, password, token, client = prismaClient }) {
-    const user = await client.user.findUnique({
+  async updateUserPassword({ email, password, token, context }) {
+    const user = await context.user.findUnique({
       where: {
         email,
       },
@@ -104,7 +103,7 @@ export const usersService = {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const updatedUser = await client.user.update({
+    const updatedUser = await context.user.update({
       where: {
         email,
       },
@@ -113,7 +112,7 @@ export const usersService = {
       },
     });
 
-    await client.passwordToken.deleteMany({
+    await context.passwordToken.deleteMany({
       where: {
         OR: [
           {
@@ -135,7 +134,7 @@ export const usersService = {
       },
     });
 
-    await client.session.deleteMany({
+    await context.session.deleteMany({
       where: {
         data: {
           contains: `"passport":{"user":${updatedUser.id}}`,
@@ -149,11 +148,11 @@ export const usersService = {
    * @summary Retrieves the user by email
    * @param {object} params The params to use.
    * @param {string} params.email The user's email.
-   * @param {PrismaClient} [params.client] The Prisma client to use.
+   * @param {PrismaClient} params.context The Prisma client to use.
    * @returns {Promise<Result>} The result of the operation.
    */
-  async getUserByEmail({ email, client = prismaClient }) {
-    const user = await client.user.findFirst({
+  async getUserByEmail({ email, context }) {
+    const user = await context.user.findFirst({
       where: {
         email,
       },

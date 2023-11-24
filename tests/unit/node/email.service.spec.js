@@ -13,7 +13,7 @@ describe('email service', () => {
   };
   const mockBaseUrl = 'baseUrl';
   const mockCreate = jest.fn();
-  const mockPrismaClient = {
+  const mockContext = {
     passwordToken: {
       create: mockCreate,
     },
@@ -96,7 +96,7 @@ describe('email service', () => {
       await emailService.sendNewAccountEmail({
         user: mockUser,
         baseUrl: mockBaseUrl,
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(mockCreate).toHaveBeenCalledWith({
@@ -121,7 +121,7 @@ describe('email service', () => {
       await emailService.sendNewAccountEmail({
         user: mockUser,
         baseUrl: mockBaseUrl,
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(emailService.send).toHaveBeenCalledWith({
@@ -144,7 +144,7 @@ describe('email service', () => {
       const result = await emailService.sendNewAccountEmail({
         user: mockUser,
         baseUrl: mockBaseUrl,
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(result.error.message).toBe('Oh no');
@@ -162,7 +162,7 @@ describe('email service', () => {
       const result = await emailService.sendNewAccountEmail({
         user: mockUser,
         baseUrl: mockBaseUrl,
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(result.value).toBe(`Email sent to user: ${mockUser.id}`);
@@ -185,7 +185,7 @@ describe('email service', () => {
       await emailService.sendForgotPasswordEmail({
         user: mockUser,
         baseUrl: mockBaseUrl,
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(mockCreate).toHaveBeenCalledWith({
@@ -210,7 +210,7 @@ describe('email service', () => {
       await emailService.sendForgotPasswordEmail({
         user: mockUser,
         baseUrl: mockBaseUrl,
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(emailService.send).toHaveBeenCalledWith({
@@ -233,7 +233,7 @@ describe('email service', () => {
       const result = await emailService.sendForgotPasswordEmail({
         user: mockUser,
         baseUrl: mockBaseUrl,
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(result.error.message).toBe('Oh no');
@@ -251,7 +251,7 @@ describe('email service', () => {
       const result = await emailService.sendForgotPasswordEmail({
         user: mockUser,
         baseUrl: mockBaseUrl,
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(result.value).toBe(`Email sent to user: ${mockUser.id}`);

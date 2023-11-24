@@ -102,18 +102,18 @@ export function createApp({ context }) {
   app.get('/forgot-password', authController.getForgotPasswordView);
   app.post('/forgot-password', authController.forgotPassword({ context }));
 
-  app.use(
-    '/reports/:name',
-    authController.ensureAuthenticated,
-    authController.ensureAuthorized('user'),
-    reportsController.getReport
-  );
-
-  app.use(
-    '/reports',
+  app.get(
+    '/reports/',
     authController.ensureAuthenticated,
     authController.ensureAuthorized('user'),
     homeController.getIndexView
+  );
+
+  app.get(
+    '/reports/:name*',
+    authController.ensureAuthenticated,
+    authController.ensureAuthorized('user'),
+    reportsController.getReport
   );
 
   app.use(logErrors);

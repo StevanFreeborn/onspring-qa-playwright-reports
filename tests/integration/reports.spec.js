@@ -48,14 +48,14 @@ afterAll(async () => {
   await sessionStore.shutdown();
 }, SETUP_HOOKS_TIMEOUT);
 
-describe('GET /', () => {
+describe('GET /reports', () => {
   /** @type {AuthUser} */
   let authUserWithNoRole;
   let authTestUserWithUserRole;
 
   beforeAll(async () => {
     const newUserWithNoRole = {
-      email: `new.test.user+${Date.now()}@test.com`,
+      email: `new.test+${Date.now()}@test.com`,
       password: testPassword,
     };
 
@@ -76,34 +76,29 @@ describe('GET /', () => {
     });
   });
 
-  test('should redirect to /login if user is not logged in', async () => {
-    const response = await request(testApp).get('/');
+  test('should redirect to /login if user is not logged in with redirect query param', async () => {
+    const reportsPath = '/reports';
+    const response = await request(testApp).get(reportsPath);
     expect(response.statusCode).toBe(302);
-    expect(response.headers.location).toBe('/login');
+    expect(response.headers.location).toBe(
+      `/login?redirect=${encodeURIComponent(reportsPath)}`
+    );
   });
 
   test('should return 403 status code if user is not authorized', async () => {
     const response = await request(testApp)
-      .get('/')
+      .get('/reports')
       .set('Cookie', [authUserWithNoRole.sessionCookie]);
 
     expect(response.statusCode).toBe(403);
   });
 
-  test('should render index view if user is authorized', async () => {
+  test('should render reports view if user is authorized', async () => {
     const response = await request(testApp)
-      .get('/')
+      .get('/reports')
       .set('Cookie', [authTestUserWithUserRole.sessionCookie]);
 
     expect(response.statusCode).toBe(200);
     expect(response.text).toContain('QA Playwright Reports');
-  });
-});
-
-describe('GET /api/ping', () => {
-  test('should return pong', async () => {
-    const response = await request(testApp).get('/api/ping');
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toEqual({ message: 'pong' });
   });
 });

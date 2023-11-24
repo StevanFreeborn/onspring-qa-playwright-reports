@@ -5,23 +5,59 @@
  * @property {string} csrfToken The csrf token
  */
 
+import { PrismaClient } from '@prisma/client';
+import { PostgreSqlContainer } from '@testcontainers/postgresql';
+import { execSync } from 'child_process';
 import { JSDOM } from 'jsdom';
 import request from 'supertest';
-import { app } from '../../app.js';
-import { prismaClient } from '../../data/prisma.js';
+import { createApp } from '../../app.js';
+import { sessionStore } from '../../auth/session.js';
 import { emailService } from '../../services/email.js';
-import { testAdminUser, testUser } from './db.setup.js';
-import { logInAsUser } from './utils.js';
+import {
+  SETUP_HOOKS_TIMEOUT,
+  logInAsUser,
+  seedTestData,
+  testAdminUser,
+  testUser,
+} from './utils.js';
+
+let container;
+let prismaClient;
+let testApp;
+
+beforeAll(async () => {
+  container = await new PostgreSqlContainer().start();
+
+  const connectionString = container.getConnectionUri();
+
+  execSync(`cross-env DATABASE_URL=${connectionString} prisma migrate deploy`);
+  prismaClient = new PrismaClient({
+    datasources: {
+      db: {
+        url: connectionString,
+      },
+    },
+  });
+
+  await seedTestData(prismaClient);
+
+  testApp = createApp({ context: prismaClient });
+}, SETUP_HOOKS_TIMEOUT);
+
+afterAll(async () => {
+  await container.stop();
+  await sessionStore.shutdown();
+}, SETUP_HOOKS_TIMEOUT);
 
 describe('GET /login', () => {
   test('it should return a 200 status code', async () => {
-    const response = await request(app).get('/login');
+    const response = await request(testApp).get('/login');
 
     expect(response.statusCode).toBe(200);
   });
 
   test('it should set a csrf cookie', async () => {
-    const response = await request(app).get('/login');
+    const response = await request(testApp).get('/login');
 
     expect(response.headers['set-cookie']).toEqual(
       expect.arrayContaining([expect.stringMatching(/^csrfToken=.+/)])
@@ -29,7 +65,7 @@ describe('GET /login', () => {
   });
 
   test('it should set a session cookie', async () => {
-    const response = await request(app).get('/login');
+    const response = await request(testApp).get('/login');
 
     expect(response.headers['set-cookie']).toEqual(
       expect.arrayContaining([expect.stringMatching(/^connect.sid=.+/)])
@@ -37,7 +73,7 @@ describe('GET /login', () => {
   });
 
   test('it should return a login view that contains a csrf token', async () => {
-    const response = await request(app).get('/login');
+    const response = await request(testApp).get('/login');
 
     const {
       window: { document: view },
@@ -57,7 +93,7 @@ describe('POST /login', () => {
   let cookies;
 
   beforeAll(async () => {
-    const response = await request(app).get('/login');
+    const response = await request(testApp).get('/login');
 
     const {
       window: { document: view },
@@ -71,7 +107,7 @@ describe('POST /login', () => {
   });
 
   test('it should return 500 error if no csrf token or cookie is in request', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/login')
       .type('x-www-form-urlencoded')
       .send({
@@ -83,7 +119,7 @@ describe('POST /login', () => {
   });
 
   test('it should return 500 error if no csrf cookie is in request', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/login')
       .type('x-www-form-urlencoded')
       .send({
@@ -96,7 +132,7 @@ describe('POST /login', () => {
   });
 
   test('it should return 500 error if no csrf token is in request body', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/login')
       .type('x-www-form-urlencoded')
       .set('Cookie', cookies)
@@ -109,7 +145,7 @@ describe('POST /login', () => {
   });
 
   test('it should return a 400 error if no password or email is provided', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/login')
       .type('x-www-form-urlencoded')
       .set('Cookie', cookies)
@@ -121,7 +157,7 @@ describe('POST /login', () => {
   });
 
   test('it should return a 400 error if no password is provided', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/login')
       .set('Cookie', cookies)
       .type('x-www-form-urlencoded')
@@ -131,7 +167,7 @@ describe('POST /login', () => {
   });
 
   test('it should return a 400 error if no email is provided', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/login')
       .set('Cookie', cookies)
       .type('x-www-form-urlencoded')
@@ -141,7 +177,7 @@ describe('POST /login', () => {
   });
 
   test('it should return a 400 error if the email is not valid', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/login')
       .set('Cookie', cookies)
       .type('x-www-form-urlencoded')
@@ -155,7 +191,7 @@ describe('POST /login', () => {
   });
 
   test('it should return a 400 error if the password is not valid', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/login')
       .set('Cookie', cookies)
       .type('x-www-form-urlencoded')
@@ -169,7 +205,7 @@ describe('POST /login', () => {
   });
 
   test('it should return a 302 redirect to index view and set a new session cookie if the email and password are valid', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/login')
       .set('Cookie', cookies)
       .type('x-www-form-urlencoded')
@@ -194,13 +230,16 @@ describe('GET /register', () => {
   let authTestAdminUser;
 
   beforeEach(async () => {
-    authTestUser = await logInAsUser(testUser);
-    authTestAdminUser = await logInAsUser(testAdminUser);
+    authTestUser = await logInAsUser({ app: testApp, user: testUser });
+    authTestAdminUser = await logInAsUser({
+      app: testApp,
+      user: testAdminUser,
+    });
   });
 
   test('it should return a 302 redirect to login view when user is not signed in with redirect query param', async () => {
     const registerPath = '/register';
-    const response = await request(app).get(registerPath);
+    const response = await request(testApp).get(registerPath);
 
     expect(response.statusCode).toBe(302);
     expect(response.headers.location).toBe(
@@ -209,7 +248,7 @@ describe('GET /register', () => {
   });
 
   test('it should return a 401 error when user is not signed in and request is xhr', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .get('/register')
       .set('X-Requested-With', 'XMLHttpRequest');
 
@@ -218,7 +257,7 @@ describe('GET /register', () => {
   });
 
   test('it should return a 403 error when user is not signed in as an admin', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .get('/register')
       .set('Cookie', [authTestUser.csrfCookie, authTestUser.sessionCookie]);
 
@@ -227,7 +266,7 @@ describe('GET /register', () => {
   });
 
   test('it should return a 403 error as json when user is not signed in as an admin and request is xhr', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .get('/register')
       .set('Cookie', [authTestUser.csrfCookie, authTestUser.sessionCookie])
       .set('X-Requested-With', 'XMLHttpRequest');
@@ -237,7 +276,7 @@ describe('GET /register', () => {
   });
 
   test('it should return a 200 status code and a register view when user is signed in as an admin', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .get('/register')
       .set('Cookie', [
         authTestAdminUser.csrfCookie,
@@ -256,12 +295,15 @@ describe('POST /register', () => {
   let authTestAdminUser;
 
   beforeEach(async () => {
-    authTestUser = await logInAsUser(testUser);
-    authTestAdminUser = await logInAsUser(testAdminUser);
+    authTestUser = await logInAsUser({ app: testApp, user: testUser });
+    authTestAdminUser = await logInAsUser({
+      app: testApp,
+      user: testAdminUser,
+    });
   });
 
   test('it should return a 500 error if no csrf token or cookie is in request', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/register')
       .set('Cookie', [authTestAdminUser.sessionCookie])
       .type('x-www-form-urlencoded')
@@ -273,7 +315,7 @@ describe('POST /register', () => {
   });
 
   test('it should return a 500 error if no csrf cookie is in request', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/register')
       .set('Cookie', [authTestAdminUser.sessionCookie])
       .type('x-www-form-urlencoded')
@@ -286,7 +328,7 @@ describe('POST /register', () => {
   });
 
   test('it should return a 500 error if no csrf token is in request body', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/register')
       .set('Cookie', [
         authTestAdminUser.sessionCookie,
@@ -302,7 +344,7 @@ describe('POST /register', () => {
 
   test('it should return a 302 redirect to login view when user is not signed in with redirect query param', async () => {
     const registerPath = '/register';
-    const response = await request(app)
+    const response = await request(testApp)
       .post(registerPath)
       .set('Cookie', [authTestAdminUser.csrfCookie])
       .type('x-www-form-urlencoded')
@@ -318,7 +360,7 @@ describe('POST /register', () => {
   });
 
   test('it should return a 401 error when user is not signed in and request is xhr', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/register')
       .set('Cookie', [authTestAdminUser.csrfCookie])
       .set('X-Requested-With', 'XMLHttpRequest')
@@ -333,7 +375,7 @@ describe('POST /register', () => {
   });
 
   test('it should return a 403 error when user is not signed in as an admin', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/register')
       .set('Cookie', [authTestUser.csrfCookie, authTestUser.sessionCookie])
       .type('x-www-form-urlencoded')
@@ -347,7 +389,7 @@ describe('POST /register', () => {
   });
 
   test('it should return a 403 error as json when user is not signed in as an admin and request is xhr', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/register')
       .set('Cookie', [authTestUser.csrfCookie, authTestUser.sessionCookie])
       .set('X-Requested-With', 'XMLHttpRequest')
@@ -362,7 +404,7 @@ describe('POST /register', () => {
   });
 
   test('it should return a 400 error if no email is provided', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/register')
       .set('Cookie', [
         authTestAdminUser.csrfCookie,
@@ -378,7 +420,7 @@ describe('POST /register', () => {
   });
 
   test('it should return a 400 error if user already exists with given email', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/register')
       .set('Cookie', [
         authTestAdminUser.csrfCookie,
@@ -400,7 +442,7 @@ describe('POST /register', () => {
       error: new Error('Failed to send email'),
     }));
 
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/register')
       .set('Cookie', [
         authTestAdminUser.csrfCookie,
@@ -423,7 +465,7 @@ describe('POST /register', () => {
       value: 'Email sent to user: 1',
     }));
 
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/register')
       .set('Cookie', [
         authTestAdminUser.csrfCookie,
@@ -443,7 +485,7 @@ describe('POST /register', () => {
 
 describe('GET /forgot-password', () => {
   test('it should return a 200 status code with forgot password view', async () => {
-    const response = await request(app).get('/forgot-password');
+    const response = await request(testApp).get('/forgot-password');
 
     expect(response.statusCode).toBe(200);
     expect(response.text).toContain('Forgot Password');
@@ -455,7 +497,7 @@ describe('POST /forgot-password', () => {
   let csrfCookie;
 
   beforeAll(async () => {
-    const response = await request(app).get('/forgot-password');
+    const response = await request(testApp).get('/forgot-password');
 
     const {
       window: { document: view },
@@ -475,7 +517,7 @@ describe('POST /forgot-password', () => {
   });
 
   test('it should return 500 error if no csrf token or cookie is in request', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/forgot-password')
       .type('x-www-form-urlencoded')
       .send({
@@ -487,7 +529,7 @@ describe('POST /forgot-password', () => {
   });
 
   test('it should return 500 error if no csrf cookie is in request', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/forgot-password')
       .type('x-www-form-urlencoded')
       .send({
@@ -500,7 +542,7 @@ describe('POST /forgot-password', () => {
   });
 
   test('it should return 500 error if no csrf token is in request body', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/forgot-password')
       .type('x-www-form-urlencoded')
       .set('Cookie', [csrfCookie])
@@ -513,7 +555,7 @@ describe('POST /forgot-password', () => {
   });
 
   test('it should return 400 status code if no email is provided', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/forgot-password')
       .set('Cookie', [csrfCookie])
       .type('x-www-form-urlencoded')
@@ -528,7 +570,7 @@ describe('POST /forgot-password', () => {
   });
 
   test('it should return 302 status code with redirect to forgot password view with success query param', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/forgot-password')
       .set('Cookie', [csrfCookie])
       .type('x-www-form-urlencoded')
@@ -555,7 +597,7 @@ describe('POST /forgot-password', () => {
       },
     });
 
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/forgot-password')
       .set('Cookie', [csrfCookie])
       .type('x-www-form-urlencoded')
@@ -582,7 +624,7 @@ describe('POST /forgot-password', () => {
       error: new Error('Failed to send email'),
     }));
 
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/forgot-password')
       .set('Cookie', [csrfCookie])
       .type('x-www-form-urlencoded')
@@ -603,7 +645,7 @@ describe('POST /forgot-password', () => {
       value: 'Email sent to user: 1',
     }));
 
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/forgot-password')
       .set('Cookie', [csrfCookie])
       .type('x-www-form-urlencoded')
@@ -620,7 +662,7 @@ describe('POST /forgot-password', () => {
 
 describe('GET /set-password', () => {
   test('it should return a 400 status code if no token is provided', async () => {
-    const response = await request(app).get('/set-password');
+    const response = await request(testApp).get('/set-password');
 
     expect(response.statusCode).toBe(400);
     expect(response.text).toContain('Invalid token');
@@ -639,7 +681,7 @@ describe('GET /set-password', () => {
       },
     });
 
-    const response = await request(app).get(
+    const response = await request(testApp).get(
       `/set-password?token=${passwordToken.token}`
     );
 
@@ -660,7 +702,7 @@ describe('GET /set-password', () => {
       },
     });
 
-    const response = await request(app).get(
+    const response = await request(testApp).get(
       `/set-password?token=${passwordToken.token}`
     );
 
@@ -675,7 +717,7 @@ describe('POST /set-password', () => {
   let createdTestUser;
 
   beforeAll(async () => {
-    const response = await request(app).get('/set-password');
+    const response = await request(testApp).get('/set-password');
 
     const {
       window: { document: view },
@@ -698,7 +740,7 @@ describe('POST /set-password', () => {
   });
 
   test('it should return 500 error if no csrf token or cookie is in request', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/set-password')
       .type('x-www-form-urlencoded')
       .send({
@@ -712,7 +754,7 @@ describe('POST /set-password', () => {
   });
 
   test('it should return 500 error if no csrf cookie is in request', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/set-password')
       .type('x-www-form-urlencoded')
       .send({
@@ -727,7 +769,7 @@ describe('POST /set-password', () => {
   });
 
   test('it should return 500 error if no csrf token is in request body', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/set-password')
       .type('x-www-form-urlencoded')
       .set('Cookie', [csrfCookie])
@@ -742,7 +784,7 @@ describe('POST /set-password', () => {
   });
 
   test('it should return 400 status code if no token is provided', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/set-password')
       .set('Cookie', [csrfCookie])
       .type('x-www-form-urlencoded')
@@ -758,7 +800,7 @@ describe('POST /set-password', () => {
   });
 
   test('it should return 400 status code if email is not provided', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/set-password')
       .set('Cookie', [csrfCookie])
       .type('x-www-form-urlencoded')
@@ -774,7 +816,7 @@ describe('POST /set-password', () => {
   });
 
   test('it should return 400 status code if password is not provided', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/set-password')
       .set('Cookie', [csrfCookie])
       .type('x-www-form-urlencoded')
@@ -790,7 +832,7 @@ describe('POST /set-password', () => {
   });
 
   test('it should return 400 status code if password does not meet complexity requirements', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/set-password')
       .set('Cookie', [csrfCookie])
       .type('x-www-form-urlencoded')
@@ -807,7 +849,7 @@ describe('POST /set-password', () => {
   });
 
   test('it should return 400 status code if verify password is not provided', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/set-password')
       .set('Cookie', [csrfCookie])
       .type('x-www-form-urlencoded')
@@ -823,7 +865,7 @@ describe('POST /set-password', () => {
   });
 
   test('it should return 400 status code if password and verify password do not match', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/set-password')
       .set('Cookie', [csrfCookie])
       .type('x-www-form-urlencoded')
@@ -852,7 +894,7 @@ describe('POST /set-password', () => {
       },
     });
 
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/set-password')
       .set('Cookie', [csrfCookie])
       .type('x-www-form-urlencoded')
@@ -881,7 +923,7 @@ describe('POST /set-password', () => {
       },
     });
 
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/set-password')
       .set('Cookie', [csrfCookie])
       .type('x-www-form-urlencoded')
@@ -910,7 +952,7 @@ describe('POST /set-password', () => {
       },
     });
 
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/set-password')
       .set('Cookie', [csrfCookie])
       .type('x-www-form-urlencoded')
@@ -932,11 +974,11 @@ describe('POST /logout', () => {
   let authTestUser;
 
   beforeEach(async () => {
-    authTestUser = await logInAsUser(testUser);
+    authTestUser = await logInAsUser({ app: testApp, user: testUser });
   });
 
   test('it should return a 500 error if no csrf token or cookie is in request', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/logout')
       .type('application/json')
       .set('X-Requested-With', 'XMLHttpRequest')
@@ -949,7 +991,7 @@ describe('POST /logout', () => {
   });
 
   test('it should return a 500 error if no csrf cookie is in request', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/logout')
       .type('application/json')
       .set('Cookie', [authTestUser.sessionCookie])
@@ -965,7 +1007,7 @@ describe('POST /logout', () => {
   });
 
   test('it should return a 500 error if no csrf token is in request body', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/logout')
       .type('application/json')
       .set('Cookie', [authTestUser.csrfCookie, authTestUser.sessionCookie])
@@ -979,7 +1021,7 @@ describe('POST /logout', () => {
   });
 
   test('it should return a 302 redirect to login view when user is signed in', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/logout')
       .type('application/json')
       .set('Cookie', [authTestUser.csrfCookie, authTestUser.sessionCookie])
@@ -992,7 +1034,7 @@ describe('POST /logout', () => {
   });
 
   test('it should return a 401 error when user is not signed in', async () => {
-    const response = await request(app)
+    const response = await request(testApp)
       .post('/logout')
       .type('application/json')
       .set('Cookie', [authTestUser.csrfCookie])

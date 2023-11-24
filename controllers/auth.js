@@ -118,203 +118,209 @@ export function getRegisterView(req, res) {
 
 /**
  * @summary Registers a new user.
- * @param {express.Request} req The request object
- * @param {express.Response} res The response object
- * @param {express.NextFunction} next The next function
- * @returns {void}
+ * @param {object} params The params to use.
+ * @param {import('@prisma/client').PrismaClient} params.context The Prisma client to use.
+ * @returns {Function} The middleware function
  */
-export async function register(req, res, next) {
-  try {
-    await Promise.all([
-      check('email', 'Email is required and should be a valid email')
-        .notEmpty()
-        .isEmail()
-        .escape()
-        .run(req),
-    ]);
+export function register({ context }) {
+  return async function (req, res, next) {
+    try {
+      await Promise.all([
+        check('email', 'Email is required and should be a valid email')
+          .notEmpty()
+          .isEmail()
+          .escape()
+          .run(req),
+      ]);
 
-    const errors = validationResult(req)
-      .formatWith(err => err.msg)
-      .array();
+      const errors = validationResult(req)
+        .formatWith(err => err.msg)
+        .array();
 
-    if (errors.length > 0) {
-      return res.status(400).render('pages/register', {
-        title: 'Register',
-        styles: ['register'],
-        formData: {
-          email: req.body.email,
-        },
-        errors: errors,
+      if (errors.length > 0) {
+        return res.status(400).render('pages/register', {
+          title: 'Register',
+          styles: ['register'],
+          formData: {
+            email: req.body.email,
+          },
+          errors: errors,
+        });
+      }
+
+      const { email } = matchedData(req);
+
+      const registerResult = await usersService.registerUser({
+        email,
+        password: generatePassword(),
+        context,
       });
-    }
 
-    const { email } = matchedData(req);
+      if (registerResult.isFailed) {
+        errors.push(registerResult.error.message);
+        return res.status(400).render('pages/register', {
+          title: 'Register',
+          styles: ['register'],
+          formData: {
+            email: req.body.email,
+          },
+          errors: errors,
+        });
+      }
 
-    const registerResult = await usersService.registerUser({
-      email,
-      password: generatePassword(),
-    });
-
-    if (registerResult.isFailed) {
-      errors.push(registerResult.error.message);
-      return res.status(400).render('pages/register', {
-        title: 'Register',
-        styles: ['register'],
-        formData: {
-          email: req.body.email,
-        },
-        errors: errors,
+      const emailResult = await emailService.sendNewAccountEmail({
+        user: registerResult.value,
+        baseUrl: `${req.protocol}://${req.get('host')}`,
+        context,
       });
+
+      if (emailResult.isFailed) {
+        return res.status(500).render('pages/register', {
+          title: 'Register',
+          styles: ['register'],
+          formData: {
+            email: req.body.email,
+          },
+          errors: ['User created but new account email failed to send.'],
+        });
+      }
+
+      return res.redirect('/register?success=true');
+    } catch (error) {
+      return next(error);
     }
-
-    const emailResult = await emailService.sendNewAccountEmail({
-      user: registerResult.value,
-      baseUrl: `${req.protocol}://${req.get('host')}`,
-    });
-
-    if (emailResult.isFailed) {
-      return res.status(500).render('pages/register', {
-        title: 'Register',
-        styles: ['register'],
-        formData: {
-          email: req.body.email,
-        },
-        errors: ['User created but new account email failed to send.'],
-      });
-    }
-
-    return res.redirect('/register?success=true');
-  } catch (error) {
-    return next(error);
-  }
+  };
 }
 
 /**
  * @summary Gets the set password view.
- * @param {express.Request} req The request object
- * @param {express.Response} res The response object
- * @param {express.NextFunction} next The next function
- * @returns {void}
+ * @param {object} params The params to use.
+ * @param {import('@prisma/client').PrismaClient} params.context The Prisma client to use.
+ * @returns {Function} The middleware function
  */
-export async function getSetPasswordView(req, res, next) {
-  const { token } = req.query;
-  try {
-    const result = await usersService.getUserByToken({ token });
+export function getSetPasswordView({ context }) {
+  return async function (req, res, next) {
+    const { token } = req.query;
+    try {
+      const result = await usersService.getUserByToken({ token, context });
 
-    if (result.isFailed) {
-      return res.status(400).render('pages/setPassword', {
+      if (result.isFailed) {
+        return res.status(400).render('pages/setPassword', {
+          title: 'Set Password',
+          styles: ['set-password'],
+          errors: [result.error.message],
+        });
+      }
+
+      return res.render('pages/setPassword', {
         title: 'Set Password',
         styles: ['set-password'],
-        errors: [result.error.message],
+        formData: {
+          email: result.value.email,
+        },
       });
+    } catch (error) {
+      return next(error);
     }
-
-    return res.render('pages/setPassword', {
-      title: 'Set Password',
-      styles: ['set-password'],
-      formData: {
-        email: result.value.email,
-      },
-    });
-  } catch (error) {
-    return next(error);
-  }
+  };
 }
 
 /**
  * @summary Sets the user's password.
- * @param {express.Request} req The request object
- * @param {express.Response} res The response object
- * @param {express.NextFunction} next The next function
- * @returns {void}
+ * @param {object} params The params to use.
+ * @param {import('@prisma/client').PrismaClient} params.context The Prisma client to use.
+ * @returns {Function} The middleware function
  */
-export async function setPassword(req, res, next) {
-  try {
-    await Promise.all([
-      check('email', 'Email is required and should be a valid email')
-        .notEmpty()
-        .isEmail()
-        .escape()
-        .run(req),
-      check(
-        'password',
-        'Password is required and should contain at least 8 characters, 1 lowercase letter, 1 uppercase letter, 1 number, and 1 symbol'
-      )
-        .notEmpty()
-        .isStrongPassword({
-          minLength: 8,
-          minLowercase: 1,
-          minUppercase: 1,
-          minNumbers: 1,
-          minSymbols: 1,
-        })
-        .escape()
-        .run(req),
-      check('verifyPassword', 'Verify password is required')
-        .notEmpty()
-        .escape()
-        .run(req),
-      check('token', 'Token is required').notEmpty().escape().run(req),
-    ]);
+export function setPassword({ context }) {
+  return async function (req, res, next) {
+    try {
+      await Promise.all([
+        check('email', 'Email is required and should be a valid email')
+          .notEmpty()
+          .isEmail()
+          .escape()
+          .run(req),
+        check(
+          'password',
+          'Password is required and should contain at least 8 characters, 1 lowercase letter, 1 uppercase letter, 1 number, and 1 symbol'
+        )
+          .notEmpty()
+          .isStrongPassword({
+            minLength: 8,
+            minLowercase: 1,
+            minUppercase: 1,
+            minNumbers: 1,
+            minSymbols: 1,
+          })
+          .escape()
+          .run(req),
+        check('verifyPassword', 'Verify password is required')
+          .notEmpty()
+          .escape()
+          .run(req),
+        check('token', 'Token is required').notEmpty().escape().run(req),
+      ]);
 
-    const errors = validationResult(req)
-      .formatWith(err => err.msg)
-      .array();
+      const errors = validationResult(req)
+        .formatWith(err => err.msg)
+        .array();
 
-    if (errors.length > 0) {
-      return res.status(400).render('pages/setPassword', {
-        title: 'Set Password',
-        styles: ['set-password'],
-        formData: {
-          email: req.body.email,
-          password: req.body.password,
-          verifyPassword: req.body.verifyPassword,
-        },
-        errors: errors,
+      if (errors.length > 0) {
+        return res.status(400).render('pages/setPassword', {
+          title: 'Set Password',
+          styles: ['set-password'],
+          formData: {
+            email: req.body.email,
+            password: req.body.password,
+            verifyPassword: req.body.verifyPassword,
+          },
+          errors: errors,
+        });
+      }
+
+      const { email, password, verifyPassword, token } = matchedData(req);
+
+      if (password !== verifyPassword) {
+        errors.push('Passwords do not match');
+        return res.status(400).render('pages/setPassword', {
+          title: 'Set Password',
+          styles: ['set-password'],
+          formData: {
+            email: email,
+            password: password,
+            verifyPassword: verifyPassword,
+          },
+          errors: errors,
+        });
+      }
+
+      const result = await usersService.updateUserPassword({
+        email,
+        password,
+        token,
+        context,
       });
+
+      if (result.isFailed) {
+        logger.error(result.error.message);
+        errors.push('Unable to set password');
+        return res.status(400).render('pages/setPassword', {
+          title: 'Set Password',
+          styles: ['set-password'],
+          formData: {
+            email: req.body.email,
+            password: req.body.password,
+            verifyPassword: req.body.verifyPassword,
+          },
+          errors: errors,
+        });
+      }
+
+      return res.redirect('/login');
+    } catch (error) {
+      return next(error);
     }
-
-    const { email, password, verifyPassword, token } = matchedData(req);
-
-    if (password !== verifyPassword) {
-      errors.push('Passwords do not match');
-      return res.status(400).render('pages/setPassword', {
-        title: 'Set Password',
-        styles: ['set-password'],
-        formData: {
-          email: email,
-          password: password,
-          verifyPassword: verifyPassword,
-        },
-        errors: errors,
-      });
-    }
-
-    const result = await usersService.updateUserPassword({
-      email,
-      password,
-      token,
-    });
-
-    if (result.isFailed) {
-      logger.error(result.error.message);
-      errors.push('Unable to set password');
-      return res.status(400).render('pages/setPassword', {
-        title: 'Set Password',
-        styles: ['set-password'],
-        formData: {
-          email: req.body.email,
-          password: req.body.password,
-          verifyPassword: req.body.verifyPassword,
-        },
-        errors: errors,
-      });
-    }
-
-    return res.redirect('/login');
-  } catch (error) {
-    return next(error);
-  }
+  };
 }
 
 /**
@@ -334,62 +340,64 @@ export function getForgotPasswordView(req, res) {
 
 /**
  * @summary Sends a forgot password email to the user.
- * @param {express.Request} req The request object
- * @param {express.Response} res The response object
- * @param {express.NextFunction} next The next function
- * @returns {void}
+ * @param {object} params The params to use.
+ * @param {import('@prisma/client').PrismaClient} params.context The Prisma client to use.
+ * @returns {Function} The middleware function
  */
-export async function forgotPassword(req, res, next) {
-  try {
-    await Promise.all([
-      check('email', 'Email is required and should be a valid email')
-        .notEmpty()
-        .isEmail()
-        .escape()
-        .run(req),
-    ]);
+export function forgotPassword({ context }) {
+  return async function (req, res, next) {
+    try {
+      await Promise.all([
+        check('email', 'Email is required and should be a valid email')
+          .notEmpty()
+          .isEmail()
+          .escape()
+          .run(req),
+      ]);
 
-    const errors = validationResult(req)
-      .formatWith(err => err.msg)
-      .array();
+      const errors = validationResult(req)
+        .formatWith(err => err.msg)
+        .array();
 
-    if (errors.length > 0) {
-      return res.status(400).render('pages/forgotPassword', {
-        title: 'Forgot Password',
-        styles: ['forgot-password'],
-        formData: {
-          email: req.body.email,
-        },
-        errors: errors,
-      });
+      if (errors.length > 0) {
+        return res.status(400).render('pages/forgotPassword', {
+          title: 'Forgot Password',
+          styles: ['forgot-password'],
+          formData: {
+            email: req.body.email,
+          },
+          errors: errors,
+        });
+      }
+
+      const { email } = matchedData(req);
+
+      const userResult = await usersService.getUserByEmail({ email, context });
+      const hasPasswordToken = userResult.value?.passwordTokens?.length > 0;
+
+      if (userResult.isSuccess && hasPasswordToken === false) {
+        await emailService.sendForgotPasswordEmail({
+          user: userResult.value,
+          baseUrl: `${req.protocol}://${req.get('host')}`,
+          context,
+        });
+      } else {
+        logger.info(
+          'User not found or already has password token. Skipping email send.',
+          {
+            userResult: userResult.isSuccess,
+            hasPasswordToken,
+          }
+        );
+        // Simulate email sending to prevent user enumeration
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+
+      return res.redirect('/forgot-password?success=true');
+    } catch (error) {
+      return next(error);
     }
-
-    const { email } = matchedData(req);
-
-    const userResult = await usersService.getUserByEmail({ email });
-    const hasPasswordToken = userResult.value?.passwordTokens?.length > 0;
-
-    if (userResult.isSuccess && hasPasswordToken === false) {
-      await emailService.sendForgotPasswordEmail({
-        user: userResult.value,
-        baseUrl: `${req.protocol}://${req.get('host')}`,
-      });
-    } else {
-      logger.info(
-        'User not found or already has password token. Skipping email send.',
-        {
-          userResult: userResult.isSuccess,
-          hasPasswordToken,
-        }
-      );
-      // Simulate email sending to prevent user enumeration
-      await new Promise(resolve => setTimeout(resolve, 2000));
-    }
-
-    return res.redirect('/forgot-password?success=true');
-  } catch (error) {
-    return next(error);
-  }
+  };
 }
 
 /**

@@ -106,10 +106,6 @@ const config = {
       testMatch: ['**/tests/integration/**/?(*.)+(spec|test).[tj]s?(x)'],
       testPathIgnorePatterns: ['\\\\node_modules\\\\'],
       clearMocks: true,
-      setupFilesAfterEnv: [
-        '<rootDir>/tests/integration/db.setup.js',
-        '<rootDir>/tests/integration/session.setup.js',
-      ],
       slowTestThreshold: 10 * 60, // 10 minutes
     },
     {

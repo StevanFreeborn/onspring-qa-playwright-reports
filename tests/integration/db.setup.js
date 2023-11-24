@@ -42,7 +42,6 @@ async function seedTestData() {
         name: 'user',
       },
     ],
-    skipDuplicates: true,
   });
 
   const createdTestAdminUser = await prismaClient.user.create({

@@ -4,7 +4,6 @@
  */
 
 import { randomBytes } from 'crypto';
-import { prismaClient } from '../data/prisma.js';
 import { logger } from '../logging/logger.js';
 import { Result } from '../utils/result.js';
 
@@ -17,15 +16,15 @@ export const emailService = {
    * @param {object} params The options to use.
    * @param {User} params.user The user to send the email to.
    * @param {string} params.baseUrl The base URL to use for the link.
-   * @param {PrismaClient} [params.client] The Prisma client to use.
+   * @param {PrismaClient} params.context The Prisma client to use.
    * @returns {Promise<Result>} The result of the operation.
    */
-  async sendNewAccountEmail({ user, baseUrl, client = prismaClient }) {
+  async sendNewAccountEmail({ user, baseUrl, context }) {
     const MS_PER_SEC = 1000;
     const MS_PER_MIN = 60 * MS_PER_SEC;
     const token = randomBytes(16).toString('base64url');
 
-    await client.passwordToken.create({
+    await context.passwordToken.create({
       data: {
         expiresAt: Date.now() + 15 * MS_PER_MIN,
         token,
@@ -64,15 +63,15 @@ export const emailService = {
    * @param {object} params The options to use.
    * @param {User} params.user The user to send the email to.
    * @param {string} params.baseUrl The base URL to use for the link.
-   * @param {PrismaClient} [params.client] The Prisma client to use.
+   * @param {PrismaClient} params.context The Prisma client to use.
    * @returns {Promise<Result>} The result of the operation.
    */
-  async sendForgotPasswordEmail({ user, baseUrl, client = prismaClient }) {
+  async sendForgotPasswordEmail({ user, baseUrl, context }) {
     const MS_PER_SEC = 1000;
     const MS_PER_MIN = 60 * MS_PER_SEC;
     const token = randomBytes(16).toString('base64url');
 
-    await client.passwordToken.create({
+    await context.passwordToken.create({
       data: {
         expiresAt: Date.now() + 15 * MS_PER_MIN,
         token,

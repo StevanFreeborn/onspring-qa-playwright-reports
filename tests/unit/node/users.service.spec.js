@@ -5,7 +5,7 @@ import { usersService } from '../../../services/users.js';
 jest.mock('../../../logging/logger.js');
 
 describe('usersService', () => {
-  const mockPrismaClient = {
+  const mockContext = {
     user: {
       findFirst: jest.fn(),
       findUnique: jest.fn(),
@@ -42,19 +42,19 @@ describe('usersService', () => {
 
   describe('registerUser', () => {
     test('it should return an error if user with given email already exists', async () => {
-      mockPrismaClient.user.findUnique.mockReturnValue({});
+      mockContext.user.findUnique.mockReturnValue({});
 
       const result = await usersService.registerUser({
         email: 'email',
         password: 'password',
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(result.isFailed).toBe(true);
       expect(result.isSuccess).toBe(false);
       expect(result.error.message).toBe('User already exists');
-      expect(mockPrismaClient.user.findUnique).toHaveBeenCalledTimes(1);
-      expect(mockPrismaClient.user.create).toHaveBeenCalledTimes(0);
+      expect(mockContext.user.findUnique).toHaveBeenCalledTimes(1);
+      expect(mockContext.user.create).toHaveBeenCalledTimes(0);
     });
 
     test('it should save the user with password hashed if user with given email does not exist', async () => {
@@ -68,22 +68,22 @@ describe('usersService', () => {
         passwordHash: 'hashedPassword',
       };
 
-      mockPrismaClient.user.findUnique.mockReturnValue(null);
-      mockPrismaClient.user.create.mockReturnValue(createdUser);
+      mockContext.user.findUnique.mockReturnValue(null);
+      mockContext.user.create.mockReturnValue(createdUser);
 
       const result = await usersService.registerUser({
         email: newUser.email,
         password: newUser.password,
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(result.isFailed).toBe(false);
       expect(result.isSuccess).toBe(true);
       expect(result.value).toEqual(createdUser);
-      expect(mockPrismaClient.user.findUnique).toHaveBeenCalledTimes(1);
+      expect(mockContext.user.findUnique).toHaveBeenCalledTimes(1);
       expect(bcrypt.hash).toHaveBeenCalledTimes(1);
-      expect(mockPrismaClient.user.create).toHaveBeenCalledTimes(1);
-      expect(mockPrismaClient.user.create).toHaveBeenCalledWith({
+      expect(mockContext.user.create).toHaveBeenCalledTimes(1);
+      expect(mockContext.user.create).toHaveBeenCalledWith({
         data: {
           email: newUser.email,
           passwordHash: 'hashedPassword',
@@ -103,33 +103,33 @@ describe('usersService', () => {
 
   describe('getUserByToken', () => {
     test('it should return an error if given token is not found', async () => {
-      mockPrismaClient.passwordToken.findFirst.mockReturnValue(null);
+      mockContext.passwordToken.findFirst.mockReturnValue(null);
 
       const result = await usersService.getUserByToken({
         token: 'token',
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(result.isFailed).toBe(true);
       expect(result.isSuccess).toBe(false);
       expect(result.error.message).toBe('Invalid token');
-      expect(mockPrismaClient.passwordToken.findFirst).toHaveBeenCalledTimes(1);
+      expect(mockContext.passwordToken.findFirst).toHaveBeenCalledTimes(1);
     });
 
     test('it should return an error if given token is expired', async () => {
-      mockPrismaClient.passwordToken.findFirst.mockReturnValue({
+      mockContext.passwordToken.findFirst.mockReturnValue({
         expiresAt: Date.now() - 1000,
       });
 
       const result = await usersService.getUserByToken({
         token: 'token',
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(result.isFailed).toBe(true);
       expect(result.isSuccess).toBe(false);
       expect(result.error.message).toBe('Invalid token');
-      expect(mockPrismaClient.passwordToken.findFirst).toHaveBeenCalledTimes(1);
+      expect(mockContext.passwordToken.findFirst).toHaveBeenCalledTimes(1);
     });
 
     test('it should return a user if given token is valid', async () => {
@@ -139,36 +139,36 @@ describe('usersService', () => {
         passwordHash: 'password',
       };
 
-      mockPrismaClient.passwordToken.findFirst.mockReturnValue({
+      mockContext.passwordToken.findFirst.mockReturnValue({
         expiresAt: Date.now() + 5000,
         user,
       });
 
       const result = await usersService.getUserByToken({
         token: 'token',
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(result.isFailed).toBe(false);
       expect(result.isSuccess).toBe(true);
       expect(result.value).toEqual(user);
-      expect(mockPrismaClient.passwordToken.findFirst).toHaveBeenCalledTimes(1);
+      expect(mockContext.passwordToken.findFirst).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('getUserByEmail', () => {
     test('it should return an error if user with given email is not found', async () => {
-      mockPrismaClient.user.findFirst.mockReturnValue(null);
+      mockContext.user.findFirst.mockReturnValue(null);
 
       const result = await usersService.getUserByEmail({
         email: 'email',
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(result.isFailed).toBe(true);
       expect(result.isSuccess).toBe(false);
       expect(result.error.message).toBe(`User not found`);
-      expect(mockPrismaClient.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(mockContext.user.findFirst).toHaveBeenCalledTimes(1);
       expect(logger.error).toHaveBeenCalledTimes(1);
     });
 
@@ -179,39 +179,39 @@ describe('usersService', () => {
         passwordHash: 'password',
       };
 
-      mockPrismaClient.user.findFirst.mockReturnValue(user);
+      mockContext.user.findFirst.mockReturnValue(user);
 
       const result = await usersService.getUserByEmail({
         email: 'email',
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(result.isFailed).toBe(false);
       expect(result.isSuccess).toBe(true);
       expect(result.value).toEqual(user);
-      expect(mockPrismaClient.user.findFirst).toHaveBeenCalledTimes(1);
+      expect(mockContext.user.findFirst).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('updateUserPassword', () => {
     test('it should return an error if user with given email is not found', async () => {
-      mockPrismaClient.user.findUnique.mockReturnValue(null);
+      mockContext.user.findUnique.mockReturnValue(null);
 
       const result = await usersService.updateUserPassword({
         email: 'email',
         password: 'password',
         token: 'token',
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(result.isFailed).toBe(true);
       expect(result.isSuccess).toBe(false);
       expect(result.error.message).toBe('User not found');
-      expect(mockPrismaClient.user.findUnique).toHaveBeenCalledTimes(1);
+      expect(mockContext.user.findUnique).toHaveBeenCalledTimes(1);
     });
 
     test('it should return an error if token does not belong to user with given email', async () => {
-      mockPrismaClient.user.findUnique.mockReturnValue({
+      mockContext.user.findUnique.mockReturnValue({
         id: 'id',
         email: 'email',
         passwordHash: 'password',
@@ -227,17 +227,17 @@ describe('usersService', () => {
         email: 'email',
         password: 'password',
         token: 'token',
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(result.isFailed).toBe(true);
       expect(result.isSuccess).toBe(false);
       expect(result.error.message).toBe('Invalid token');
-      expect(mockPrismaClient.user.findUnique).toHaveBeenCalledTimes(1);
+      expect(mockContext.user.findUnique).toHaveBeenCalledTimes(1);
     });
 
     test('it should return an error if token is expired', async () => {
-      mockPrismaClient.user.findUnique.mockReturnValue({
+      mockContext.user.findUnique.mockReturnValue({
         id: 'id',
         email: 'email',
         passwordHash: 'password',
@@ -253,13 +253,13 @@ describe('usersService', () => {
         email: 'email',
         password: 'password',
         token: 'token',
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(result.isFailed).toBe(true);
       expect(result.isSuccess).toBe(false);
       expect(result.error.message).toBe('Invalid token');
-      expect(mockPrismaClient.user.findUnique).toHaveBeenCalledTimes(1);
+      expect(mockContext.user.findUnique).toHaveBeenCalledTimes(1);
     });
 
     test("it should update the users password after hashing it, delete the user's invalid tokens, and delete user's existing sessions", async () => {
@@ -280,23 +280,23 @@ describe('usersService', () => {
         passwordHash: 'hashedPassword',
       };
 
-      mockPrismaClient.user.findUnique.mockReturnValue(user);
-      mockPrismaClient.user.update.mockReturnValue(updatedUser);
+      mockContext.user.findUnique.mockReturnValue(user);
+      mockContext.user.update.mockReturnValue(updatedUser);
 
       const result = await usersService.updateUserPassword({
         email: 'email',
         password: 'password',
         token: 'token',
-        client: mockPrismaClient,
+        context: mockContext,
       });
 
       expect(result.isFailed).toBe(false);
       expect(result.isSuccess).toBe(true);
       expect(result.value).toEqual(updatedUser);
-      expect(mockPrismaClient.user.findUnique).toHaveBeenCalledTimes(1);
+      expect(mockContext.user.findUnique).toHaveBeenCalledTimes(1);
       expect(bcrypt.hash).toHaveBeenCalledTimes(1);
-      expect(mockPrismaClient.user.update).toHaveBeenCalledTimes(1);
-      expect(mockPrismaClient.user.update).toHaveBeenCalledWith({
+      expect(mockContext.user.update).toHaveBeenCalledTimes(1);
+      expect(mockContext.user.update).toHaveBeenCalledWith({
         where: {
           email: 'email',
         },
@@ -304,10 +304,8 @@ describe('usersService', () => {
           passwordHash: 'hashedPassword',
         },
       });
-      expect(mockPrismaClient.passwordToken.deleteMany).toHaveBeenCalledTimes(
-        1
-      );
-      expect(mockPrismaClient.session.deleteMany).toHaveBeenCalledTimes(1);
+      expect(mockContext.passwordToken.deleteMany).toHaveBeenCalledTimes(1);
+      expect(mockContext.session.deleteMany).toHaveBeenCalledTimes(1);
     });
   });
 });

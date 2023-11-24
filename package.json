@@ -8,9 +8,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "cross-env TZ=utc nodemon -q server.js",
-    "test": "cross-env NODE_ENV=test jest",
-    "test:unit": "cross-env NODE_ENV=test jest --selectProjects unit-node unit-browser",
-    "test:integration": "cross-env NODE_ENV=test jest --selectProjects integration",
+    "test": "cross-env NODE_ENV=test jest --no-cache",
+    "test:unit": "cross-env NODE_ENV=test jest --selectProjects unit-node unit-browser --no-cache",
+    "test:integration": "cross-env NODE_ENV=test jest --selectProjects integration --no-cache",
     "lint:fix": "eslint --fix .",
     "format:fix": "prettier --log-level silent --write .",
     "migrate": "prisma migrate dev",

@@ -22,7 +22,7 @@ export const hashedTestPassword = bcrypt.hashSync(testPassword, 10);
  */
 export const testAdminUser = {
   id: 0,
-  email: `admin+${Date.now()}@test.com`,
+  email: `test.user@admin.com`,
   password: testPassword,
 };
 
@@ -31,7 +31,7 @@ export const testAdminUser = {
  */
 export const testUser = {
   id: 0,
-  email: `user+${Date.now()}@test.com`,
+  email: `test.user@user.com`,
   password: testPassword,
 };
 

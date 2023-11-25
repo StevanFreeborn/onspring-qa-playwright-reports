@@ -9,7 +9,7 @@
     "start": "node server.js",
     "test:server": "cross-env NODE_ENV=test node tests/e2e/server.js",
     "dev": "cross-env TZ=utc nodemon -q server.js",
-    "test": "cross-env NODE_ENV=test jest --no-cache",
+    "test": "cross-env NODE_ENV=test jest",
     "test:unit": "cross-env NODE_ENV=test jest --selectProjects unit-node unit-browser --no-cache",
     "test:integration": "cross-env NODE_ENV=test jest --selectProjects integration --no-cache",
     "lint:fix": "eslint --fix .",

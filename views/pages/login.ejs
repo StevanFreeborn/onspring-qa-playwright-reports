@@ -16,7 +16,7 @@
         </section>
         <section class="form-group">
           <label for="password">Password</label>
-          <input value="<%= locals.formData?.password ?? '' %>" id="password" name="password" type="password" autocomplete="password" required>
+          <input value="<%= locals.formData?.password ?? '' %>" id="password" name="password" type="password" autocomplete="current-password" required>
         </section>
         <section>
           <input name="_csrf" value="<%= csrfToken %>" type="hidden" />

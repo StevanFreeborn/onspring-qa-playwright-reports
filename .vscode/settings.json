@@ -5,6 +5,7 @@
     "logtail",
     "quixo",
     "resave",
+    "teardowns",
     "testcontainers"
   ],
   "emmet.includeLanguages": {

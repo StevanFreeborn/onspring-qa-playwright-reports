@@ -15,10 +15,10 @@
   <% }) %>
   <% } %>
 
-  <script src="/js/nav.js" defer></script>
+  <script src="/js/nav.js" defer type="module"></script>
   <% if (locals.scripts && scripts.length) { %>
   <% scripts.forEach(script => { %>
-  <script src="/js/<%= script %>.js"></script>
+  <script src="/js/<%= script %>.js" defer type="module"></script>
   <% }) %>
   <% } %>
 

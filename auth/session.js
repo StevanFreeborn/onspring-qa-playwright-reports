@@ -16,7 +16,7 @@ export let sessionStore;
  */
 export function createSession({ context }) {
   sessionStore = new PrismaSessionStore(context, {
-    checkPeriod: 2 * 60 * 1000,
+    checkPeriod: 2 * 60 * 1000, // 2 minutes
     dbRecordIdIsSessionId: true,
     dbRecordIdFunction: undefined,
   });
@@ -30,6 +30,7 @@ export function createSession({ context }) {
       secure: process.env.NODE_ENV === 'production', // HTTPS only in production,
       sameSite: 'lax',
       httpOnly: true,
+      maxAge: 12 * 60 * 60 * 1000, // 12 hours
     },
     store: sessionStore,
   });

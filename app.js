@@ -26,10 +26,13 @@ import { morgan } from './logging/morgan.js';
  */
 export function createApp({ context }) {
   const app = express();
+
   app.use(morgan);
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
   app.use(cookieParser(process.env.COOKIE_SECRET));
+
+  app.use(express.static(path.join(process.cwd(), 'public')));
 
   if (process.env.NODE_ENV === 'production') {
     app.set('trust proxy', 1);
@@ -42,6 +45,7 @@ export function createApp({ context }) {
   passport.use(createLocalStrategy({ context }));
   passport.deserializeUser(createDeserializeUser({ context }));
   passport.serializeUser(serializeUser);
+
   app.use(passport.initialize());
   app.use(passport.session());
 
@@ -57,8 +61,6 @@ export function createApp({ context }) {
     res.locals.user = req.user;
     next();
   });
-
-  app.use(express.static(path.join(process.cwd(), 'public')));
 
   app.get('/api/ping', homeController.checkStatus);
 

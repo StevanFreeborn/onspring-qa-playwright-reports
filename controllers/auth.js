@@ -454,10 +454,7 @@ export function ensureAuthorized(role) {
  * @returns {void}
  */
 export function ensureAnonymous(req, res, next) {
-  if (
-    req.isAuthenticated() === false ||
-    req.user.roles.includes('user') === false
-  ) {
+  if (req.isAuthenticated() === false) {
     return next();
   }
 

@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import { execSync } from 'child_process';
 import { createApp } from '../../app.js';
+import { seedDatabase } from './utils.js';
 
 run().catch(error => {
   console.error(error);
@@ -32,11 +33,7 @@ async function run() {
   });
 
   console.log('Seeding database');
-  // TODO: Seed test data
-  // need to see admin and user roles
-  // need to seed user with admin and user role
-  // need to seed user with user role
-  // need to seed user with no roles
+  await seedDatabase(context);
   console.log('Seeded database');
 
   console.log('Starting server');

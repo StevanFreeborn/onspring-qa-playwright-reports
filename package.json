@@ -12,6 +12,7 @@
     "test": "cross-env NODE_ENV=test jest",
     "test:unit": "cross-env NODE_ENV=test jest --selectProjects unit-node unit-browser --no-cache",
     "test:integration": "cross-env NODE_ENV=test jest --selectProjects integration --no-cache",
+    "test:e2e": "cross-env NODE_ENV=test playwright test",
     "lint:fix": "eslint --fix .",
     "format:fix": "prettier --log-level silent --write .",
     "migrate": "prisma migrate dev",

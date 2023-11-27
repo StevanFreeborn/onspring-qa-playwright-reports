@@ -1,5 +1,5 @@
 import express from 'express';
-import * as reportsService from '../services/reports.js';
+import { reportsService } from '../services/reports.js';
 
 /**
  * @summary Gets the index view.
@@ -15,4 +15,14 @@ export function getIndexView(req, res) {
     scripts: ['index'],
     reports: reports,
   });
+}
+
+/**
+ * @summary Checks the status of the app.
+ * @param {express.Request} req The request object
+ * @param {express.Response} res The response object
+ * @returns {void}
+ */
+export function checkStatus(req, res) {
+  return res.json({ message: 'pong' });
 }

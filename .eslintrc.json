@@ -1,6 +1,7 @@
 {
   "ignorePatterns": ["node_modules/", "reports/"],
   "env": {
+    "jest": true,
     "browser": true,
     "node": true,
     "es6": true
@@ -8,6 +9,8 @@
   "extends": [
     "eslint:recommended",
     "plugin:jsdoc/recommended",
+    "plugin:jest/recommended",
+    "plugin:playwright/recommended",
     "plugin:prettier/recommended"
   ],
   "overrides": [],

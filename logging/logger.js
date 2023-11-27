@@ -26,8 +26,8 @@ const levels = {
  */
 function level() {
   const env = process.env.NODE_ENV || 'development';
-  const isDevelopment = env === 'development';
-  return isDevelopment ? 'debug' : 'warn';
+  const isProduction = env === 'production';
+  return isProduction ? 'warn' : 'debug';
 }
 
 /**
@@ -89,32 +89,33 @@ const jsonFormat = winston.format.combine(
  * @summary Defines the transports.
  * @type {Array} The transports.
  */
-const transports = [
-  new winston.transports.Console({
-    format: consoleFormat,
-  }),
-];
+const transports = [];
 
 if (process.env.NODE_ENV === 'production') {
-  transports.push(
-    new winston.transports.File({
-      filename: 'logs/error.log',
-      level: 'error',
-      format: jsonFormat,
-    })
-  );
-  transports.push(
-    new winston.transports.File({
-      filename: 'logs/all.log',
-      format: jsonFormat,
-    })
-  );
-
   const logtail = new Logtail(process.env.LOGTAIL_SOURCE_TOKEN);
   const logtailTransport = new LogtailTransport(logtail, {
     format: jsonFormat,
   });
+
   transports.push(logtailTransport);
+}
+
+if (process.env.NODE_ENV === 'test') {
+  const fileTransport = new winston.transports.File({
+    filename: 'logs/test_log.json',
+    format: jsonFormat,
+    options: { flag: 'w' },
+  });
+
+  transports.push(fileTransport);
+}
+
+if (process.env.NODE_ENV === 'development') {
+  const consoleTransport = new winston.transports.Console({
+    format: consoleFormat,
+  });
+
+  transports.push(consoleTransport);
 }
 
 export const logger = winston.createLogger({

@@ -13,21 +13,30 @@ import path from 'path';
  */
 export async function getReport(req, res, next) {
   try {
-    const reportDirPath = path.join(process.cwd(), 'reports', req.params.name);
-    const reportFilePath = path.join(reportDirPath, req.path);
+    const paths = req.path.split('/');
+    let reportFilePath = path.join(process.cwd(), req.path);
 
-    if (fs.existsSync(reportDirPath) === false) {
+    // If the path is /reports/:reportName, redirect to /reports/:reportName/
+    // this is so the relative paths in the playwright report work properly
+    if (paths.length === 3) {
+      return res.redirect(`${req.path}/`);
+    }
+
+    // if the path is not a file in the reports directory
+    // call next middleware function
+    if (fs.existsSync(reportFilePath) === false) {
       return next();
     }
 
-    if (req.path === '/') {
-      const modifiedReport = await modifyReport(reportDirPath, req);
-      return res.send(modifiedReport);
+    // if the path is a file in the reports directory
+    // and the path does not a directory then send the file
+    if (paths[paths.length - 1] !== '') {
+      return res.sendFile(reportFilePath);
     }
 
-    if (fs.existsSync(reportFilePath)) {
-      return res.sendFile(req.path, { root: reportDirPath });
-    }
+    // otherwise serve the directory index.html file with the modified report view
+    const modifiedReport = await modifyReport(reportFilePath, req);
+    return res.send(modifiedReport);
   } catch (error) {
     next(error);
   }

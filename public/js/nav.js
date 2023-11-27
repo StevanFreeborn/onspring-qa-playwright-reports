@@ -48,10 +48,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggleButton = document.getElementById('toggle');
 
   if (logoutButton) {
-    logoutButton.addEventListener('click', eventHandler.logOutUser);
+    logoutButton.addEventListener('click', async () => {
+      await eventHandler.logOutUser();
+    });
   }
 
   if (toggleButton) {
-    toggleButton.addEventListener('click', eventHandler.toggleNav);
+    toggleButton.addEventListener('click', () => {
+      eventHandler.toggleNav();
+    });
   }
 });

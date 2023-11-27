@@ -39,6 +39,10 @@ table {
 
 /* End CSS Reset */
 
+:root {
+  --cta-color: #f7941d;
+}
+
 html,
 body {
   height: 100%;
@@ -103,7 +107,7 @@ main {
 
 .logout-button {
   border: 0;
-  background: #f7941d;
+  background: var(--cta-color);
   color: #ffffff;
   padding: 7.5px 15px;
   border-radius: 3px;

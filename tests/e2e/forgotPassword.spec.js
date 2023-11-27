@@ -8,10 +8,8 @@ test.describe('Forgot Password', () => {
   }, testInfo) => {
     await page.goto('/forgot-password');
 
-    const excludedSelectors = ['.send-button'];
-
     const accessibilityScanResults = await new AxeBuilder({ page })
-      .exclude(excludedSelectors)
+      .exclude('.send-button')
       .analyze();
 
     await saveAccessibilityResultsToReport(testInfo, accessibilityScanResults);

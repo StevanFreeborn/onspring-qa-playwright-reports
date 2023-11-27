@@ -9,10 +9,8 @@ test.describe('Login', () => {
   }, testInfo) => {
     await page.goto('/login');
 
-    const excludedSelectors = ['.login-button'];
-
     const accessibilityScanResults = await new AxeBuilder({ page })
-      .exclude(excludedSelectors)
+      .exclude('.login-button')
       .analyze();
 
     await saveAccessibilityResultsToReport(testInfo, accessibilityScanResults);

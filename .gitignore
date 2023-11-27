@@ -5,3 +5,10 @@ certs
 !.env.project
 !.env.vault
 *.log
+coverage/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+logs/
+tests/e2e/.auth/

@@ -8,37 +8,42 @@ import fs from 'fs';
  */
 
 /**
- * @summary Gets the test reports.
- * @returns {Array<Report>} The test reports.
+ * @summary The report service.
  */
-export function getReports() {
-  // report directory names contain the following pieces
-  // of information in order listed delimited by "-"
-  // + {date in ms}
-  // + {environment}
-  // + {status}
-  // + {github workflow name}
-  // + {github workflow run number}
-  // + {github workflow run attempt}
-  // + {pull request identifier} (only present if run on a pull request)
-  //   i.e. PR_{pull request number}
-  // this is currently enforced by the test CI workflow
-  // maybe we use database in future?
-  const reportNames = fs.readdirSync('./reports');
-  const reports = reportNames.map(reportName => {
-    const [date, environment, status, workflow, number, attempt, pr] =
-      reportName.split('-');
-    return {
-      date: parseInt(date),
-      environment,
-      status,
-      path: reportName,
-      workflow,
-      number,
-      attempt,
-      pr,
-    };
-  });
+export const reportsService = {
+  /**
+   * @summary Gets the test reports.
+   * @returns {Array<Report>} The test reports.
+   */
+  getReports() {
+    // report directory names contain the following pieces
+    // of information in order listed delimited by "-"
+    // + {date in ms}
+    // + {environment}
+    // + {status}
+    // + {github workflow name}
+    // + {github workflow run number}
+    // + {github workflow run attempt}
+    // + {pull request identifier} (only present if run on a pull request)
+    //   i.e. PR_{pull request number}
+    // this is currently enforced by the test CI workflow
+    // maybe we use database in future?
+    const reportNames = fs.readdirSync('./reports');
+    const reports = reportNames.map(reportName => {
+      const [date, environment, status, workflow, number, attempt, pr] =
+        reportName.split('-');
+      return {
+        date: parseInt(date),
+        environment,
+        status,
+        path: reportName,
+        workflow,
+        number,
+        attempt,
+        pr,
+      };
+    });
 
-  return reports.reverse();
-}
+    return reports.reverse();
+  },
+};

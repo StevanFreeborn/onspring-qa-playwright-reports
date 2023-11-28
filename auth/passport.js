@@ -15,6 +15,9 @@ export function createLocalStrategy({ context }) {
       passwordField: 'password',
     },
     async function (email, password, done) {
+      const LOCKOUT_TIME_IN_MS = 60000;
+      const LOCKOUT_TIME_IN_MINUTES = LOCKOUT_TIME_IN_MS / 1000 / 60;
+
       try {
         const user = await context.user.findUnique({
           where: {
@@ -26,15 +29,51 @@ export function createLocalStrategy({ context }) {
           return done(null, false, { message: 'Invalid username or password' });
         }
 
+        if (
+          user.failedLoginAttempts >= 5 &&
+          user?.lastLoginAttempt > Date.now() - LOCKOUT_TIME_IN_MS
+        ) {
+          return done(null, false, {
+            message: `Too many failed login attempts, please try again in ${LOCKOUT_TIME_IN_MINUTES} minutes`,
+          });
+        }
+
+        await context.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            lastLoginAttempt: Date.now(),
+          },
+        });
+
         const isPasswordValid = await bcrypt.compare(
           password,
           user.passwordHash
         );
 
         if (isPasswordValid === false) {
+          await context.user.update({
+            where: {
+              id: user.id,
+            },
+            data: {
+              failedLoginAttempts: {
+                increment: 1,
+              },
+            },
+          });
           return done(null, false, { message: 'Invalid username or password' });
         }
 
+        await context.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            failedLoginAttempts: 0,
+          },
+        });
         return done(null, user);
       } catch (error) {
         done(error);

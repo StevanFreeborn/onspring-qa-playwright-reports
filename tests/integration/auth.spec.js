@@ -204,6 +204,11 @@ describe('POST /login', () => {
     expect(response.statusCode).toBe(400);
   });
 
+  test('it should return a 400 error if user has failed to login 5 times in a row and attempts to login again within 1 minute of last attempt', async () => {
+    // TODO: Implement test
+    expect(true).toBe(false);
+  });
+
   test('it should return a 302 redirect to index view and set a new session cookie if the email and password are valid', async () => {
     const response = await request(testApp)
       .post('/login')

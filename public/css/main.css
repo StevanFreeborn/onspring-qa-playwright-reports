@@ -45,8 +45,7 @@ table {
 
 html,
 body {
-  min-height: 100%;
-  height: max-content;
+  height: 100%;
 }
 
 body {
@@ -68,6 +67,7 @@ body {
 }
 
 main {
+  min-height: max-content;
   padding: 0 24px;
 }
 

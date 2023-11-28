@@ -204,6 +204,77 @@ describe('POST /login', () => {
     expect(response.statusCode).toBe(400);
   });
 
+  test('it should return a 400 error if user has failed to login 5 times in a row and attempts to login again within 1 minute of last attempt', async () => {
+    await prismaClient.user.update({
+      where: {
+        id: testUser.id,
+      },
+      data: {
+        failedLoginAttempts: 5,
+        lastLoginAttempt: Date.now(),
+      },
+    });
+
+    const response = await request(testApp)
+      .post('/login')
+      .set('Cookie', cookies)
+      .type('x-www-form-urlencoded')
+      .send({
+        email: testUser.email,
+        password: testUser.password,
+        _csrf: csrfToken,
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.text).toContain('Too many failed login attempts');
+
+    await prismaClient.user.update({
+      where: {
+        id: testUser.id,
+      },
+      data: {
+        failedLoginAttempts: 0,
+        lastLoginAttempt: null,
+      },
+    });
+  });
+
+  test('it should return a 302 redirect to index view when user enters correct password after waiting 1 minute after entering incorrect password 5 times', async () => {
+    await prismaClient.user.update({
+      where: {
+        id: testUser.id,
+      },
+      data: {
+        failedLoginAttempts: 5,
+        lastLoginAttempt: Date.now() - 60 * 1000,
+      },
+    });
+
+    const response = await request(testApp)
+      .post('/login')
+      .set('Cookie', cookies)
+      .type('x-www-form-urlencoded')
+      .send({
+        email: testUser.email,
+        password: testUser.password,
+        _csrf: csrfToken,
+      });
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe('/');
+    expect(response.headers['set-cookie']).toEqual(
+      expect.arrayContaining([expect.stringMatching(/^connect.sid=.+/)])
+    );
+
+    const storedUser = await prismaClient.user.findUnique({
+      where: {
+        id: testUser.id,
+      },
+    });
+
+    expect(storedUser.failedLoginAttempts).toBe(0);
+  });
+
   test('it should return a 302 redirect to index view and set a new session cookie if the email and password are valid', async () => {
     const response = await request(testApp)
       .post('/login')

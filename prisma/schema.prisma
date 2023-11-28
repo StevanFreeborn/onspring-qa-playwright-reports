@@ -11,11 +11,13 @@ datasource db {
 }
 
 model User {
-  id            Int             @id @default(autoincrement())
-  email         String          @unique
-  passwordHash  String
-  userRoles     UserRoles[]
-  passwordTokens PasswordToken[]
+  id                  Int             @id @default(autoincrement())
+  email               String          @unique
+  passwordHash        String
+  userRoles           UserRoles[]
+  passwordTokens      PasswordToken[]
+  lastLoginAttempt    BigInt?
+  failedLoginAttempts Int             @default(0)
 }
 
 model Session {
@@ -41,8 +43,8 @@ model UserRoles {
 }
 
 model PasswordToken {
-  id        Int      @id @default(autoincrement())
-  token     String   @unique
+  id        Int    @id @default(autoincrement())
+  token     String @unique
   userId    Int
   expiresAt BigInt
 

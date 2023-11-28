@@ -1,5 +1,13 @@
 {
-  "ignorePatterns": ["node_modules/", "reports/"],
+  "ignorePatterns": [
+    "node_modules/",
+    "reports/",
+    "playwright-report/",
+    "test-results/",
+    "coverage/",
+    "logs/",
+    ".vscode/"
+  ],
   "env": {
     "jest": true,
     "browser": true,

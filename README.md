@@ -34,3 +34,5 @@ This application is used in conjunction with the [OnspringEnd2EndTests](https://
 
 - [Playwright](https://playwright.dev/)
 - [Jest](https://jestjs.io/)
+- [Docker](https://www.docker.com/)
+- [Testcontainers](https://testcontainers.com/)

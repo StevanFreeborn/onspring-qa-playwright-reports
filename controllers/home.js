@@ -9,11 +9,31 @@ import { reportsService } from '../services/reports.js';
  */
 export function getIndexView(req, res) {
   const reports = reportsService.getReports();
+  const statuses = reports
+    .map(report => {
+      const status = report.status;
+      return status[0].toUpperCase() + status.slice(1).toLowerCase();
+    })
+    .filter((value, index, self) => self.indexOf(value) === index)
+    .filter(Boolean);
+  const workflows = reports
+    .map(report => report.workflow)
+    .filter((value, index, self) => self.indexOf(value) === index)
+    .filter(Boolean);
+
+  const environments = reports
+    .map(report => report.environment)
+    .filter((value, index, self) => self.indexOf(value) === index)
+    .filter(Boolean);
+
   res.render('pages/index', {
     title: 'QA Playwright Reports',
     styles: ['index'],
     scripts: ['index'],
     reports: reports,
+    statuses: statuses,
+    workflows: workflows,
+    environments: environments,
   });
 }
 

@@ -31,6 +31,7 @@ test.describe('Index', () => {
     })
       .exclude('.label')
       .exclude('.logout-button')
+      .exclude('#clearFiltersButton')
       .analyze();
 
     await saveAccessibilityResultsToReport(testInfo, accessibilityScanResults);

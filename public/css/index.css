@@ -5,12 +5,55 @@ main {
   margin-top: 1rem;
 }
 
+.filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.filter-group label {
+  font-weight: bold;
+}
+
+.filter-group input {
+  padding: 0.25rem;
+}
+
+.filter-group select {
+  padding: 0.35rem;
+}
+
+.clear-filters-container {
+  display: flex;
+  align-items: flex-end;
+}
+
+#clearFiltersButton {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  margin-bottom: 0.5rem;
+}
+
 .test-file-test {
   display: flex;
   padding: 1rem;
   gap: 1rem;
   font-size: 16px;
   flex-wrap: wrap;
+}
+
+.hidden {
+  display: none;
 }
 
 .label-container {

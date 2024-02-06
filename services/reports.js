@@ -28,7 +28,13 @@ export const reportsService = {
     //   i.e. PR_{pull request number}
     // this is currently enforced by the test CI workflow
     // maybe we use database in future?
-    const reportNames = fs.readdirSync('./reports');
+    const reportDir = './reports';
+
+    if (fs.existsSync(reportDir) === false) {
+      return [];
+    }
+
+    const reportNames = fs.readdirSync(reportDir);
     const reports = reportNames.map(reportName => {
       const [date, environment, status, workflow, number, attempt, pr] =
         reportName.split('-');

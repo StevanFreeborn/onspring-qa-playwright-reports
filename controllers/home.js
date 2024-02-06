@@ -9,6 +9,7 @@ import { reportsService } from '../services/reports.js';
  */
 export function getIndexView(req, res) {
   const reports = reportsService.getReports();
+
   const statuses = reports
     .map(report => {
       const status = report.status;
@@ -16,6 +17,7 @@ export function getIndexView(req, res) {
     })
     .filter((value, index, self) => self.indexOf(value) === index)
     .filter(Boolean);
+
   const workflows = reports
     .map(report => report.workflow)
     .filter((value, index, self) => self.indexOf(value) === index)

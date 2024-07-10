@@ -1,9 +1,11 @@
 /* eslint-disable no-console */
 import { PrismaClient } from '@prisma/client';
-import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import { execSync } from 'child_process';
 import { createApp } from '../../app.js';
 import { seedDatabase } from './utils.js';
+import path from 'path';
+import { rm } from 'fs/promises';
+import { existsSync } from 'fs';
 
 run().catch(error => {
   console.error(error);
@@ -14,11 +16,13 @@ run().catch(error => {
  * @summary This function is used to setup the database and start the server for end to end testing.
  */
 async function run() {
-  console.log('Starting container');
-  const container = await new PostgreSqlContainer().start();
-  console.log('Container started');
+  const sqliteFilePath = path.join(process.cwd(), 'db', 'e2e-test.db');
 
-  const connectionString = container.getConnectionUri();
+  if (existsSync(sqliteFilePath)) {
+    await rm(sqliteFilePath);
+  }
+
+  const connectionString = `file:${sqliteFilePath}`;
 
   console.log('Running migrations');
   execSync(`cross-env DATABASE_URL=${connectionString} prisma migrate deploy`);
@@ -40,11 +44,6 @@ async function run() {
   const app = createApp({ context });
   const server = app.listen(5000, () => {
     console.log('Server started. Listening on port 5000');
-  });
-
-  server.on('close', async () => {
-    console.log('Stopping container');
-    await container.stop();
   });
 
   ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'uncaughtException'].forEach(event =>

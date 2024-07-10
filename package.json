@@ -48,14 +48,14 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-jest": "^27.6.0",
     "eslint-plugin-jsdoc": "^46.9.0",
+    "eslint-plugin-playwright": "^0.18.0",
     "eslint-plugin-prettier": "^5.0.1",
     "husky": "^8.0.3",
     "jest": "^29.7.0",
     "nodemon": "^3.0.1",
     "prettier": "^3.1.0",
-    "prisma": "^5.6.0",
-    "supertest": "^6.3.3",
-    "eslint-plugin-playwright": "^0.18.0"
+    "prisma": "^5.16.2",
+    "supertest": "^6.3.3"
   },
   "dependencies": {
     "@logtail/node": "^0.4.16",

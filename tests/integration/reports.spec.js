@@ -6,7 +6,6 @@
  */
 
 import { PrismaClient } from '@prisma/client';
-import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -21,15 +20,21 @@ import {
   testPassword,
   testUser,
 } from './utils.js';
+import { faker } from '@faker-js/faker';
+import { rm } from 'fs/promises';
 
-let container;
+let sqliteFilePath;
 let prismaClient;
 let testApp;
 
 beforeAll(async () => {
-  container = await new PostgreSqlContainer().start();
+  sqliteFilePath = path.join(
+    process.cwd(),
+    'db',
+    `${faker.string.uuid()}-test.db`
+  );
 
-  const connectionString = container.getConnectionUri();
+  const connectionString = `file:${sqliteFilePath}`;
 
   execSync(`cross-env DATABASE_URL=${connectionString} prisma migrate deploy`);
   prismaClient = new PrismaClient({
@@ -46,8 +51,9 @@ beforeAll(async () => {
 }, SETUP_HOOKS_TIMEOUT);
 
 afterAll(async () => {
-  await container.stop();
   await sessionStore.shutdown();
+  await prismaClient.$disconnect();
+  await rm(sqliteFilePath);
 }, SETUP_HOOKS_TIMEOUT);
 
 describe('GET /reports', () => {

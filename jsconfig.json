@@ -1,5 +1,6 @@
 {
   "typeAcquisition": {
-    "include": ["jest"]
+    "include": ["jest"],
+    "exclude": ["node_modules/", "playwright-report/", "coverage/"]
   }
 }

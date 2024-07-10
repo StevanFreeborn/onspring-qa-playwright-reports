@@ -12,3 +12,4 @@ coverage/
 /playwright/.cache/
 logs/
 tests/e2e/.auth/
+db/

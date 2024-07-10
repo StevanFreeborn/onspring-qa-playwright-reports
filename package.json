@@ -7,6 +7,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
+    "start:render": "prisma migrate deploy && prisma generate && node server.js",
     "test:server": "cross-env NODE_ENV=test node tests/e2e/server.js",
     "dev": "cross-env TZ=utc nodemon -q server.js",
     "test": "cross-env NODE_ENV=test jest && npx playwright test",
@@ -19,6 +20,7 @@
     "generate": "prisma generate",
     "studio": "prisma studio",
     "build": "npm add -D prisma && npm install --ignore-scripts && prisma migrate deploy && prisma generate",
+    "build:render": "npm add -D prisma && npm install --ignore-scripts",
     "prepare": "husky install"
   },
   "prisma": {

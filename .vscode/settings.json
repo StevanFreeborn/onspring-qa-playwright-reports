@@ -1,4 +1,5 @@
 {
+  "editor.formatOnSave": true,
   "javascript.preferences.importModuleSpecifierEnding": "js",
   "cSpell.words": [
     "datasources",

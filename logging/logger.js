@@ -27,7 +27,7 @@ const levels = {
 function level() {
   const env = process.env.NODE_ENV || 'development';
   const isProduction = env === 'production';
-  return isProduction ? 'info' : 'debug';
+  return isProduction ? 'http' : 'debug';
 }
 
 /**

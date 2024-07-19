@@ -15,7 +15,7 @@ import * as homeController from './controllers/home.js';
 import * as reportsController from './controllers/reports.js';
 import { clientErrorHandler } from './errors/client.js';
 import { errorHandler, notFoundHandler } from './errors/server.js';
-import { logErrors } from './logging/logger.js';
+import { logErrors, logger } from './logging/logger.js';
 import { morgan } from './logging/morgan.js';
 
 /**
@@ -53,6 +53,13 @@ export function createApp({ context }) {
   app.set('views', path.join(process.cwd(), 'views'));
 
   app.use((req, res, next) => {
+    logger.info({
+      sessionId: req.sessionID,
+      session: req.session,
+      cookies: req.cookies,
+      signedCookies: req.signedCookies,
+    });
+
     if (req.session.csrfToken === undefined && req.method === 'GET') {
       req.session.csrfToken = req.csrfToken();
     }

@@ -3419,9 +3419,8 @@
         async readUint8Array(t, n) {
           const r = this,
             o = t + n;
-          let i = await (t || o < r.size
-            ? r.blob.slice(t, o)
-            : r.blob
+          let i = await (
+            t || o < r.size ? r.blob.slice(t, o) : r.blob
           ).arrayBuffer();
           return i.byteLength > n && (i = i.slice(t, o)), new Uint8Array(i);
         }

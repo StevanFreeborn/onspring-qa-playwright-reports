@@ -1,6 +1,15 @@
 {
+  "exclude": [
+    "node_modules/",
+    "playwright-report/",
+    "coverage/",
+    "logs/",
+    "reports/",
+    "test-results/",
+    ".vscode/",
+    ".husky/"
+  ],
   "typeAcquisition": {
-    "include": ["jest"],
-    "exclude": ["node_modules/", "playwright-report/", "coverage/"]
+    "include": ["jest"]
   }
 }

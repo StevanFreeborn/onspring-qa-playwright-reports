@@ -1,0 +1,15 @@
+name: onspring-qa-playwright-reports-dev
+services:
+  onspring-qa-playwright-reports-dev:
+    container_name: onspring-qa-playwright-reports-dev
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - './reports:/app/reports'
+      - './db:/app/db'
+    ports:
+      - '3000:3000'
+    restart: unless-stopped
+    env_file:
+      - .env

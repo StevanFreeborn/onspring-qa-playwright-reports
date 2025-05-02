@@ -39,7 +39,7 @@ jobs:
         run: echo "version=$(date +%Y.%m.%d.%H%M%S)" >> $GITHUB_OUTPUT
       - name: Build Docker image
         run: |
-          TAG=${{ secrets.DOCKERHUB_USERNAME }}/onspringqareports.stevanfreeborn.com/${{ steps.version.outputs.version }}
+          TAG=${{ secrets.DOCKERHUB_USERNAME }}/onspringqareports.stevanfreeborn.com:${{ steps.version.outputs.version }}
           docker build -t $TAG .
           docker push $TAG
   deploy:
@@ -70,7 +70,7 @@ jobs:
             
             docker stop onspringqareports.stevanfreeborn.com
             docker rm onspringqareports.stevanfreeborn.com
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/onspringqareports.stevanfreeborn.com/${{ needs.build.outputs.version }}
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/onspringqareports.stevanfreeborn.com:${{ needs.build.outputs.version }}
             docker run \
               --name onspringqareports.stevanfreeborn.com \
               -v ./reports:/app/reports \
@@ -79,6 +79,6 @@ jobs:
               -restart always \
               --env-file .env \
               -d \
-              ${{ secrets.DOCKERHUB_USERNAME }}/onspringqareports.stevanfreeborn.com/${{ needs.build.outputs.version }}
+              ${{ secrets.DOCKERHUB_USERNAME }}/onspringqareports.stevanfreeborn.com:${{ needs.build.outputs.version }}
             
             rm .env

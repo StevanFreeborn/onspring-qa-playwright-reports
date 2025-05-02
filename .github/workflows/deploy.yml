@@ -76,7 +76,7 @@ jobs:
               -v ./reports:/app/reports \
               -v ./db:/app/db \
               -p 9999:3000 \
-              -restart always \
+              --restart always \
               --env-file .env \
               -d \
               ${{ secrets.DOCKERHUB_USERNAME }}/onspringqareports.stevanfreeborn.com:${{ needs.build.outputs.version }}

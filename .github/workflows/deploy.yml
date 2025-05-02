@@ -56,17 +56,17 @@ jobs:
           script: |
             cd onspringqareports.stevanfreeborn.com
 
-            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-            echo "SESSION_SECRET=${{ secrets.SESSION_SECRET }}" >> .env
-            echo "CSRF_SECRET=${{ secrets.CSRF_SECRET }}" >> .env
-            echo "COOKIE_SECRET=${{ secrets.COOKIE_SECRET }}" >> .env
-            echo "NODE_ENV=production" >> .env
-            echo "LOGTAIL_SOURCE_TOKEN=${{ secrets.LOGTAIL_SOURCE_TOKEN }}" >> .env
-            echo "EMAIL_JS_SERVICE_ID=${{ secrets.EMAIL_JS_SERVICE_ID }}" >> .env
-            echo "EMAIL_JS_PUBLIC_KEY=${{ secrets.EMAIL_JS_PUBLIC_KEY }}" >> .env
-            echo "EMAIL_JS_PRIVATE_KEY=${{ secrets.EMAIL_JS_PRIVATE_KEY }}" >> .env
-            echo "NEW_ACCOUNT_EMAIL_TEMPLATE_ID=${{ secrets.NEW_ACCOUNT_EMAIL_TEMPLATE_ID }}" >> .env
-            echo "FORGOT_PASSWORD_EMAIL_TEMPLATE_ID=${{ secrets.FORGOT_PASSWORD_EMAIL_TEMPLATE_ID }}" >> .env
+            echo 'DATABASE_URL=${{ secrets.DATABASE_URL }}' >> .env
+            echo 'SESSION_SECRET=${{ secrets.SESSION_SECRET }}' >> .env
+            echo 'CSRF_SECRET=${{ secrets.CSRF_SECRET }}' >> .env
+            echo 'COOKIE_SECRET=${{ secrets.COOKIE_SECRET }}' >> .env
+            echo 'NODE_ENV=production' >> .env
+            echo 'LOGTAIL_SOURCE_TOKEN=${{ secrets.LOGTAIL_SOURCE_TOKEN }}' >> .env
+            echo 'EMAIL_JS_SERVICE_ID=${{ secrets.EMAIL_JS_SERVICE_ID }}' >> .env
+            echo 'EMAIL_JS_PUBLIC_KEY=${{ secrets.EMAIL_JS_PUBLIC_KEY }}' >> .env
+            echo 'EMAIL_JS_PRIVATE_KEY=${{ secrets.EMAIL_JS_PRIVATE_KEY }}' >> .env
+            echo 'NEW_ACCOUNT_EMAIL_TEMPLATE_ID=${{ secrets.NEW_ACCOUNT_EMAIL_TEMPLATE_ID }}' >> .env
+            echo 'FORGOT_PASSWORD_EMAIL_TEMPLATE_ID=${{ secrets.FORGOT_PASSWORD_EMAIL_TEMPLATE_ID }}' >> .env
             
             docker stop onspringqareports.stevanfreeborn.com
             docker rm onspringqareports.stevanfreeborn.com
@@ -74,7 +74,7 @@ jobs:
             docker run \
               --name onspringqareports.stevanfreeborn.com \
               -v ./reports:/app/reports \
-              -v ./db:/app/db \
+              -v ./data:/app/db \
               -p 9999:3000 \
               --restart always \
               --env-file .env \

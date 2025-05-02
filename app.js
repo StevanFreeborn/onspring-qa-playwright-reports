@@ -87,15 +87,15 @@ export function createApp({ context }) {
 
   app.get(
     '/register',
-    // authController.ensureAuthenticated,
-    // authController.ensureAuthorized('admin'),
+    authController.ensureAuthenticated,
+    authController.ensureAuthorized('admin'),
     authController.getRegisterView
   );
 
   app.post(
     '/register',
-    // authController.ensureAuthenticated,
-    // authController.ensureAuthorized('admin'),
+    authController.ensureAuthenticated,
+    authController.ensureAuthorized('admin'),
     authController.register({ context })
   );
 

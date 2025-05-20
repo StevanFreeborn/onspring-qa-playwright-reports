@@ -4,13 +4,14 @@ This is an application designed to store and present playwright html reports gen
 
 ## Use Case
 
-This application is used in conjunction with the [OnspringEnd2EndTests](https://github.com/StevanFreeborn/OnspringEnd2EndTests) repository. The OnspringEnd2EndTests repository contains the tests that are run against the Onspring application. The tests are run using the playwright framework. When the tests are run they produce an html report as an artifact. After the report is generated it is committed to this repository and then the application is deployed with the updated reports directory to a web service hosted on Render. These reports can potentially contain trace files which shouldn't be shared publicly, but come in very useful when debugging failed or flaky tests. This application is used to store and present the html reports, but require authentication to view them.
+This application is used in conjunction with the [OnspringEnd2EndTests](https://github.com/StevanFreeborn/OnspringEnd2EndTests) repository. The OnspringEnd2EndTests repository contains the tests that are run against the Onspring application. The tests are run using the playwright framework. When the tests are run they produce an html report as an artifact. After the report is generated it is published and served by this application. These reports can potentially contain trace files which shouldn't be shared publicly, but come in very useful when debugging failed or flaky tests. This application is used to store and present the html reports, but require authentication to view them.
 
 ## Technologies
 
 ### Hosting
 
-- [Render](https://render.com/)
+- VPS
+- [Docker](https://www.docker.com/)
 
 ### Runtime
 
@@ -19,7 +20,7 @@ This application is used in conjunction with the [OnspringEnd2EndTests](https://
 ### Database
 
 - [Prisma](https://www.prisma.io/)
-- [PostgreSQL](https://www.postgresql.org/)
+- [SQLite](https://www.sqlite.org/index.html)
 
 ### Server
 

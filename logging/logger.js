@@ -1,3 +1,4 @@
+import { SeqTransport } from '@datalust/winston-seq';
 import { Logtail } from '@logtail/node';
 import { LogtailTransport } from '@logtail/winston';
 import express from 'express';
@@ -91,6 +92,12 @@ const jsonFormat = winston.format.combine(
  */
 const transports = [];
 
+const consoleTransport = new winston.transports.Console({
+  format: consoleFormat,
+});
+
+transports.push(consoleTransport);
+
 if (process.env.NODE_ENV === 'production') {
   const logtail = new Logtail(process.env.LOGTAIL_SOURCE_TOKEN);
   const logtailTransport = new LogtailTransport(logtail, {
@@ -110,15 +117,31 @@ if (process.env.NODE_ENV === 'test') {
   transports.push(fileTransport);
 }
 
-if (process.env.NODE_ENV === 'development') {
-  const consoleTransport = new winston.transports.Console({
-    format: consoleFormat,
+if (
+  process.env.SEQ_SERVER_URL &&
+  process.env.SEQ_API_KEY &&
+  process.env.SEQ_API_KEY_HEADER
+) {
+  const seqTransport = new SeqTransport({
+    format: jsonFormat,
+    serverUrl: process.env.SEQ_SERVER_URL,
+    apiKey: process.env.SEQ_API_KEY,
+    onError: e => {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    },
+    handleExceptions: true,
+    handleRejections: true,
   });
 
-  transports.push(consoleTransport);
+  transports.push(seqTransport);
 }
 
 export const logger = winston.createLogger({
+  defaultMeta: {
+    service: 'qa-playwright-reports',
+    environment: process.env.NODE_ENV,
+  },
   level: level(),
   levels,
   transports,

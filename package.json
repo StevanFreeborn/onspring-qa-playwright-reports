@@ -61,6 +61,7 @@
     "supertest": "^7.1.0"
   },
   "dependencies": {
+    "@datalust/winston-seq": "^3.0.1",
     "@logtail/node": "^0.4.21",
     "@logtail/winston": "^0.4.23",
     "@prisma/client": "^6.7.0",

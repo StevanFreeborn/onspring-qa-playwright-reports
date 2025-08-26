@@ -1,5 +1,6 @@
 name: Pull Request
 env:
+  HOME: /root
   SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
   CSRF_SECRET: ${{ secrets.CSRF_SECRET }}
   COOKIE_SECRET: ${{ secrets.COOKIE_SECRET }}

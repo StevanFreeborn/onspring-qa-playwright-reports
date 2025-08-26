@@ -1,0 +1,61 @@
+name: Pull Request
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths-ignore:
+      - '.github/**'
+      - '.vscode/**'
+      - '.husky/**'
+      - '.gitignore'
+      - 'README.md'
+      - 'LICENSE.md'
+      - 'docker-compose.dev.yml'
+      - 'example.env'
+      - 'jsconfig.json'
+jobs:
+  format:
+    name: Run Prettier
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Prettier
+        run: npm run format
+  lint:
+    name: Run ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts
+      - name: Install dependencies
+        run: npm ci
+      - name: Run ESLint
+        run: npm run lint
+  test:
+    name: Run ESLint
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-jammy
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Playwright tests
+        run: npm run test

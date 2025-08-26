@@ -67,7 +67,7 @@ jobs:
             echo 'EMAIL_JS_PRIVATE_KEY=${{ secrets.EMAIL_JS_PRIVATE_KEY }}' >> .env
             echo 'NEW_ACCOUNT_EMAIL_TEMPLATE_ID=${{ secrets.NEW_ACCOUNT_EMAIL_TEMPLATE_ID }}' >> .env
             echo 'FORGOT_PASSWORD_EMAIL_TEMPLATE_ID=${{ secrets.FORGOT_PASSWORD_EMAIL_TEMPLATE_ID }}' >> .env
-            echo 'SEQ_SERVER_URL=${{ secrets.SEQ_SERVER_URL }}' >> .env
+            echo 'SEQ_SERVER_URL=http://seq:80' >> .env
             echo 'SEQ_API_KEY=${{ secrets.SEQ_API_KEY }}' >> .env
             echo 'SEQ_API_KEY_HEADER=${{ secrets.SEQ_API_KEY_HEADER }}' >> .env
 
@@ -81,6 +81,7 @@ jobs:
               -p 9999:3000 \
               --restart always \
               --env-file .env \
+              --network seq-network \
               -d \
               ${{ secrets.DOCKERHUB_USERNAME }}/onspringqareports.stevanfreeborn.com:${{ needs.build.outputs.version }}
 

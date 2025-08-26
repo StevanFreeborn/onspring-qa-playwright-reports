@@ -16,7 +16,7 @@
     "test:e2e": "cross-env NODE_ENV=test playwright test",
     "lint:check": "eslint .",
     "lint:fix": "eslint --fix .",
-    "format:check": "prettier --log-level silent --check .",
+    "format:check": "prettier --check .",
     "format:fix": "prettier --log-level silent --write .",
     "migrate": "prisma migrate dev",
     "generate": "prisma generate",

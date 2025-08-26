@@ -1,6 +1,5 @@
 name: Pull Request
 env:
-  HOME: /root
   SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
   CSRF_SECRET: ${{ secrets.CSRF_SECRET }}
   COOKIE_SECRET: ${{ secrets.COOKIE_SECRET }}
@@ -70,3 +69,5 @@ jobs:
         run: npm ci
       - name: Run Playwright tests
         run: npm run test
+        env:
+          HOME: /root

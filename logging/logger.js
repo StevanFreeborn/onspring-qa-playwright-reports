@@ -1,4 +1,3 @@
-import { SeqTransport } from '@datalust/winston-seq';
 import { Logtail } from '@logtail/node';
 import { LogtailTransport } from '@logtail/winston';
 import express from 'express';
@@ -96,7 +95,9 @@ const consoleTransport = new winston.transports.Console({
   format: consoleFormat,
 });
 
-transports.push(consoleTransport);
+if (process.env.NODE_ENV !== 'test') {
+  transports.push(consoleTransport);
+}
 
 if (process.env.NODE_ENV === 'production') {
   const logtail = new Logtail(process.env.LOGTAIL_SOURCE_TOKEN);
@@ -120,21 +121,26 @@ if (process.env.NODE_ENV === 'test') {
 if (
   process.env.SEQ_SERVER_URL &&
   process.env.SEQ_API_KEY &&
-  process.env.SEQ_API_KEY_HEADER
+  process.env.SEQ_API_KEY_HEADER &&
+  process.env.NODE_ENV !== 'test'
 ) {
-  const seqTransport = new SeqTransport({
-    format: jsonFormat,
-    serverUrl: process.env.SEQ_SERVER_URL,
-    apiKey: process.env.SEQ_API_KEY,
-    onError: e => {
-      // eslint-disable-next-line no-console
-      console.error(e);
-    },
-    handleExceptions: true,
-    handleRejections: true,
-  });
+  import('@datalust/winston-seq').then(seqModule => {
+    const SeqTransport = seqModule.SeqTransport;
 
-  transports.push(seqTransport);
+    const seqTransport = new SeqTransport({
+      format: jsonFormat,
+      serverUrl: process.env.SEQ_SERVER_URL,
+      apiKey: process.env.SEQ_API_KEY,
+      onError: e => {
+        // eslint-disable-next-line no-console
+        console.error(e);
+      },
+      handleExceptions: true,
+      handleRejections: true,
+    });
+
+    transports.push(seqTransport);
+  });
 }
 
 export const logger = winston.createLogger({

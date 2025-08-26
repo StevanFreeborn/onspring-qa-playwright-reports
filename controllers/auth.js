@@ -8,6 +8,18 @@ import { emailService } from '../services/email.js';
 import { usersService } from '../services/users.js';
 
 /**
+ * @summary Gets the base URL for the request, taking into account proxy headers.
+ * @param {express.Request} req The request object
+ * @returns {string} The base URL
+ */
+function getBaseUrl(req) {
+  // When behind a proxy, use forwarded headers if available
+  const protocol = req.get('X-Forwarded-Proto') || req.protocol;
+  const host = req.get('X-Forwarded-Host') || req.get('host');
+  return `${protocol}://${host}`;
+}
+
+/**
  * @summary Gets the login view.
  * @param {express.Request} req The request object
  * @param {express.Response} res The response object
@@ -170,7 +182,7 @@ export function register({ context }) {
 
       const emailResult = await emailService.sendNewAccountEmail({
         user: registerResult.value,
-        baseUrl: `${req.protocol}://${req.get('host')}`,
+        baseUrl: getBaseUrl(req),
         context,
       });
 
@@ -378,7 +390,7 @@ export function forgotPassword({ context }) {
       if (userResult.isSuccess && hasPasswordToken === false) {
         await emailService.sendForgotPasswordEmail({
           user: userResult.value,
-          baseUrl: `${req.protocol}://${req.get('host')}`,
+          baseUrl: getBaseUrl(req),
           context,
         });
       } else {

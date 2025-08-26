@@ -14,3 +14,4 @@ logs/
 tests/e2e/.auth/
 db/
 .cert/
+testReports/

@@ -3,6 +3,13 @@
  */
 export const eventHandler = {
   /**
+   * @summary Redirect the browser to a URL
+   * @param {string} url The URL to redirect to
+   */
+  redirect(url) {
+    window.location.href = url;
+  },
+  /**
    * @summary Log out a user
    * @returns {Promise<void>}
    */
@@ -19,7 +26,7 @@ export const eventHandler = {
     });
 
     if (response.redirected) {
-      return (window.location.href = response.url);
+      return this.redirect(response.url);
     }
 
     return alert('We were unable to log you out. Please try again.');

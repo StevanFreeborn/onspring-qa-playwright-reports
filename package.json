@@ -21,8 +21,8 @@
     "migrate": "prisma migrate dev",
     "generate": "prisma generate",
     "studio": "prisma studio",
-    "build": "npm add -D prisma && npm install --ignore-scripts && prisma migrate deploy && prisma generate",
-    "build:render": "npm add -D prisma && npm install --ignore-scripts",
+    "build": "npm add -D prisma && npm install && prisma migrate deploy && prisma generate",
+    "build:render": "npm add -D prisma && npm install",
     "prepare": "husky"
   },
   "prisma": {

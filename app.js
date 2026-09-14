@@ -113,7 +113,7 @@ export function createApp({ context }) {
   );
 
   app.get(
-    '/reports/:name*',
+    '/reports/*name',
     authController.ensureAuthenticated,
     authController.ensureAuthorized('user'),
     reportsController.getReport

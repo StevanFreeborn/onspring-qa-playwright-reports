@@ -14,7 +14,7 @@ test.describe('Forgot Password', () => {
 
     await saveAccessibilityResultsToReport(testInfo, accessibilityScanResults);
 
-    expect(accessibilityScanResults.violations.length).toBe(0);
+    expect(accessibilityScanResults.violations).toHaveLength(0);
   });
 
   test('it should contain a heading that has expected text', async ({

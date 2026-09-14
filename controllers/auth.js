@@ -21,11 +21,11 @@ function getBaseUrl(req) {
 
 /**
  * @summary Gets the login view.
- * @param {express.Request} req The request object
+ * @param {express.Request} _req The request object
  * @param {express.Response} res The response object
  * @returns {void}
  */
-export function getLoginView(req, res) {
+export function getLoginView(_req, res) {
   return res.render('pages/login', {
     title: 'Login',
     styles: ['login'],

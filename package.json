@@ -18,15 +18,13 @@
     "lint:fix": "eslint --fix .",
     "format:check": "prettier --check .",
     "format:fix": "prettier --log-level silent --write .",
+    "seed": "prisma db seed",
     "migrate": "prisma migrate dev",
     "generate": "prisma generate",
     "studio": "prisma studio",
     "build": "npm add -D prisma && npm install && prisma migrate deploy && prisma generate",
     "build:render": "npm add -D prisma && npm install",
     "prepare": "husky"
-  },
-  "prisma": {
-    "seed": "node prisma/seed.js"
   },
   "author": {
     "name": "Stevan Freeborn",

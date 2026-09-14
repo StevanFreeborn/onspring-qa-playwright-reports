@@ -1,8 +1,7 @@
 import bcrypt from 'bcrypt';
 import { logger } from '../../../logging/logger.js';
 import { usersService } from '../../../services/users.js';
-
-jest.mock('../../../logging/logger.js');
+import { jest } from '@jest/globals';
 
 describe('usersService', () => {
   const mockContext = {

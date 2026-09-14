@@ -3,7 +3,7 @@
  * @typedef { import("@prisma/client").PrismaClient } PrismaClient
  */
 
-import { randomBytes } from 'crypto';
+import crypto from 'crypto';
 import { logger } from '../logging/logger.js';
 import { Result } from '../utils/result.js';
 
@@ -22,7 +22,7 @@ export const emailService = {
   async sendNewAccountEmail({ user, baseUrl, context }) {
     const MS_PER_SEC = 1000;
     const MS_PER_MIN = 60 * MS_PER_SEC;
-    const token = randomBytes(16).toString('base64url');
+    const token = crypto.randomBytes(16).toString('base64url');
 
     await context.passwordToken.create({
       data: {
@@ -69,7 +69,7 @@ export const emailService = {
   async sendForgotPasswordEmail({ user, baseUrl, context }) {
     const MS_PER_SEC = 1000;
     const MS_PER_MIN = 60 * MS_PER_SEC;
-    const token = randomBytes(16).toString('base64url');
+    const token = crypto.randomBytes(16).toString('base64url');
 
     await context.passwordToken.create({
       data: {

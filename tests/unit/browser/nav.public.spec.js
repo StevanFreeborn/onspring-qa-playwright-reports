@@ -1,4 +1,5 @@
 import { eventHandler } from '../../../public/js/nav.js';
+import { jest } from '@jest/globals';
 
 describe('nav', () => {
   test('it should add event listeners when content is loaded an buttons are present', async () => {

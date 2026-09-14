@@ -23,9 +23,9 @@ test.describe('Login', () => {
   }) => {
     await page.goto('/login');
 
-    const heading = page;
+    const heading = page.getByRole('heading');
 
-    await expect(heading).toHaveText('h1', 'Onspring QA Reports');
+    await expect(heading).toHaveText('Onspring QA Reports');
   });
 
   test('it should contain login form', async ({ page }) => {

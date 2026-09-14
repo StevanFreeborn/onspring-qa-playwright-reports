@@ -36,7 +36,7 @@ test.describe('Index', () => {
 
     await saveAccessibilityResultsToReport(testInfo, accessibilityScanResults);
 
-    expect(accessibilityScanResults.violations.length).toBe(0);
+    expect(accessibilityScanResults.violations).toHaveLength(0);
   });
 
   test('it should have nav brand link that links to index page', async ({

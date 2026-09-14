@@ -15,7 +15,7 @@ test.describe('Login', () => {
 
     await saveAccessibilityResultsToReport(testInfo, accessibilityScanResults);
 
-    expect(accessibilityScanResults.violations.length).toBe(0);
+    expect(accessibilityScanResults.violations).toHaveLength(0);
   });
 
   test('it should contain a heading that has expected text', async ({
@@ -23,9 +23,9 @@ test.describe('Login', () => {
   }) => {
     await page.goto('/login');
 
-    const heading = await page.innerText('h1');
+    const heading = page.getByRole('heading');
 
-    expect(heading).toBe('Onspring QA Reports');
+    await expect(heading).toHaveText('Onspring QA Reports');
   });
 
   test('it should contain login form', async ({ page }) => {

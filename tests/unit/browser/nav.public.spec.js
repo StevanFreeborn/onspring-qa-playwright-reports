@@ -1,4 +1,5 @@
 import { eventHandler } from '../../../public/js/nav.js';
+import { jest } from '@jest/globals';
 
 describe('nav', () => {
   test('it should add event listeners when content is loaded an buttons are present', async () => {
@@ -34,6 +35,10 @@ describe('nav', () => {
 
     test('it should have a getCsrfToken function', () => {
       expect(eventHandler.getCsrfToken).toBeDefined();
+    });
+
+    test('it should have a redirect function', () => {
+      expect(eventHandler.redirect).toBeDefined();
     });
 
     describe('toggleNav', () => {
@@ -78,25 +83,12 @@ describe('nav', () => {
           url: 'test-url',
         });
 
-        const windowLocation = window.location;
-        delete window.location;
-        window.location = {
-          href: {
-            _href: '',
-
-            get value() {
-              return this._href;
-            },
-
-            set value(href) {
-              this._href = href;
-            },
-          },
-        };
+        jest.spyOn(eventHandler, 'redirect').mockImplementation();
 
         await eventHandler.logOutUser();
 
-        expect(window.location.href).toEqual('test-url');
+        expect(eventHandler.redirect).toHaveBeenCalledTimes(1);
+        expect(eventHandler.redirect).toHaveBeenCalledWith('test-url');
         expect(fetch).toHaveBeenCalledTimes(1);
         expect(fetch).toHaveBeenCalledWith('/logout', {
           method: 'POST',
@@ -108,8 +100,6 @@ describe('nav', () => {
             _csrf: 'test-csrf-token',
           }),
         });
-
-        window.location = windowLocation;
       });
 
       test('it should alert user when logout is unsuccessful', async () => {

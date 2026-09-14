@@ -44,7 +44,7 @@ test.describe('Set Password', () => {
 
     await saveAccessibilityResultsToReport(testInfo, accessibilityScanResults);
 
-    expect(accessibilityScanResults.violations.length).toBe(0);
+    expect(accessibilityScanResults.violations).toHaveLength(0);
   });
 
   test('it should display set password form', async ({ page }) => {

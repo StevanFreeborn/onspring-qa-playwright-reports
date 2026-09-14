@@ -6,6 +6,7 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import { execSync } from 'child_process';
 import request from 'supertest';
 import { createApp } from '../../app.js';
@@ -36,13 +37,8 @@ beforeAll(async () => {
   const connectionString = `file:${sqliteFilePath}`;
 
   execSync(`cross-env DATABASE_URL=${connectionString} prisma migrate deploy`);
-  prismaClient = new PrismaClient({
-    datasources: {
-      db: {
-        url: connectionString,
-      },
-    },
-  });
+  const adapter = new PrismaBetterSqlite3({ url: connectionString });
+  prismaClient = new PrismaClient({ adapter });
 
   await seedTestData(prismaClient);
 

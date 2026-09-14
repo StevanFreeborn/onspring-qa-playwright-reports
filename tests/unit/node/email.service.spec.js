@@ -1,8 +1,7 @@
 import crypto from 'crypto';
 import { logger } from '../../../logging/logger.js';
 import { emailService } from '../../../services/email.js';
-
-jest.mock('crypto');
+import { jest } from '@jest/globals';
 
 describe('email service', () => {
   const env = process.env;

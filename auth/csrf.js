@@ -110,6 +110,8 @@ function verifyCsrf(requestCsrf, cookieCsrf, _secret) {
     const decryptedCookie = decryptCookie(cookieCsrf, _secret);
     return decryptedCookie === requestCsrf;
   } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error(err);
     return false;
   }
 }

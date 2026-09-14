@@ -3,14 +3,17 @@ import path from 'path';
 import { AUTH_STORAGE_PATH } from '../../../playwright.config.js';
 import { test as setup } from '../fixtures/index.js';
 
+// eslint-disable-next-line playwright/expect-expect
 setup('login as user with no role', async ({ page, testUser }) => {
   await login(page, testUser.withNoRole);
 });
 
+// eslint-disable-next-line playwright/expect-expect
 setup('login as user with user role', async ({ page, testUser }) => {
   await login(page, testUser.withUserRole);
 });
 
+// eslint-disable-next-line playwright/expect-expect
 setup('login as user with admin role', async ({ page, testUser }) => {
   await login(page, testUser.withAdminRole);
 });

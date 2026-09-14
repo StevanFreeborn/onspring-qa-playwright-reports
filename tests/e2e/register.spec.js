@@ -48,7 +48,7 @@ test.describe('Register', () => {
 
     await saveAccessibilityResultsToReport(testInfo, accessibilityScanResults);
 
-    expect(accessibilityScanResults.violations.length).toBe(0);
+    expect(accessibilityScanResults.violations).toHaveLength(0);
   });
 
   test('it should contain register form', async ({ userWithAdminRole }) => {

@@ -23,6 +23,7 @@ import {
 import { faker } from '@faker-js/faker';
 import path from 'path';
 import { rm } from 'fs/promises';
+import { jest } from '@jest/globals';
 
 let sqliteFilePath;
 let prismaClient;

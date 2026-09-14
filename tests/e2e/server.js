@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import { PrismaClient } from '@prisma/client';
+import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
 import { execSync } from 'child_process';
 import { createApp } from '../../app.js';
 import { seedDatabase } from './utils.js';
@@ -28,13 +29,8 @@ async function run() {
   execSync(`cross-env DATABASE_URL=${connectionString} prisma migrate deploy`);
   console.log('Migrations ran');
 
-  const context = new PrismaClient({
-    datasources: {
-      db: {
-        url: connectionString,
-      },
-    },
-  });
+  const adapter = new PrismaBetterSqlite3({ url: connectionString });
+  const context = new PrismaClient({ adapter });
 
   console.log('Seeding database');
   await seedDatabase(context);
